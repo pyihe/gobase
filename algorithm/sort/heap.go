@@ -12,12 +12,12 @@ package sort
 	3. 移除堆顶元素，重复步骤2，直到堆的尺寸为1
 */
 
-func HeapSort(data []int) {
+func Heap(data []int) {
 	count := len(data)
 	if count < 1 {
 		return
 	}
-	//构建最大堆
+	// 构建最大堆
 	maxHeap(data, count)
 
 	for i := count - 1; i >= 0; i-- {
@@ -27,7 +27,7 @@ func HeapSort(data []int) {
 	}
 }
 
-//创建最大堆
+// 创建最大堆
 func maxHeap(data []int, len int) {
 	for i := len / 2; i >= 0; i-- {
 		heap(data, i, len)

@@ -7,8 +7,8 @@ package sort
 	3. 重复步骤1、2
 */
 
-//选择排序:每次选择出未排序切片里最大或者最小的数放入已排好序的数组里
-func SelectSort(data []int) {
+// Select 选择排序:每次选择出未排序切片里最大或者最小的数放入已排好序的数组里
+func Select(data []int) {
 	count := len(data)
 	if count <= 0 {
 		return

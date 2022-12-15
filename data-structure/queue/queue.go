@@ -1,7 +1,5 @@
 package queue
 
-const defaultQueueSize = 32
-
 type Queue interface {
 	// String 用于打印，按照顺序打印元素
 	String() string

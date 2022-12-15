@@ -15,7 +15,7 @@ package sort
 2. 比较相邻的元素。如果第一个比第二个大，则交换位置，最终当前最大的数将会被移到数组末尾，所以每次内层循环中，数组最后i个元素不需要进行比较。
 */
 
-func BubbleSort(data []int) {
+func Bubble(data []int) {
 	count := len(data)
 	if count <= 0 {
 		return

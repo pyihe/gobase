@@ -15,12 +15,12 @@ package sort
 	利用桶排序的原理，依次对每个元素对每一位进行桶排序
 */
 
-func RadixSort(data []int) {
+func Radix(data []int) {
 	length := len(data)
 	if length <= 1 {
 		return
 	}
-	//找出原始数据中的最大值的位数，这里是10进制
+	// 找出原始数据中的最大值的位数，这里是10进制
 	max, _ := getMaxMin(data)
 	var maxBitCnt int
 	for max > 0 {
@@ -28,20 +28,20 @@ func RadixSort(data []int) {
 		max /= 10
 	}
 
-	var bucket [][]int               //0-9对应每一位上的数值
-	mod := 10                        //用于获取每个元素的每一位的值
-	radix := 1                       //配合mod用于获取桶的索引
-	for i := 0; i < maxBitCnt; i++ { //操作每一位，个十百千...
-		//每次操作前需要将桶清空，否则桶中还包含上一次处理的结果
+	var bucket [][]int               // 0-9对应每一位上的数值
+	mod := 10                        // 用于获取每个元素的每一位的值
+	radix := 1                       // 配合mod用于获取桶的索引
+	for i := 0; i < maxBitCnt; i++ { // 操作每一位，个十百千...
+		// 每次操作前需要将桶清空，否则桶中还包含上一次处理的结果
 		bucket = make([][]int, 10)
-		for j := 0; j < length; j++ { //获取每个元素的每一位
+		for j := 0; j < length; j++ { // 获取每个元素的每一位
 			bucketIndex := (data[j] % mod) / radix
 			bucket[bucketIndex] = append(bucket[bucketIndex], data[j])
 		}
 		pos := 0
 		for j := 0; j < len(bucket); j++ {
 			if len(bucket[j]) > 0 {
-				//对桶内的元素进行排序
+				// 对桶内的元素进行排序
 				for k := 0; k < len(bucket[j]); k++ {
 					data[pos] = bucket[j][k]
 					pos++

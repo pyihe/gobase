@@ -15,30 +15,30 @@ package sort
 	4. 从不是空的桶子里把项目再放回原来的序列中。
 */
 
-func BucketSort(data []int) {
+func Bucket(data []int) {
 	count := len(data)
 	if count <= 1 {
 		return
 	}
-	//首先初始化桶的数量
-	//获取最大最小值
+	// 首先初始化桶的数量
+	// 获取最大最小值
 	max, min := getMaxMin(data)
-	var factor = 10                      //决定桶数量大小的因子
-	var bucketCnt = (max-min)/factor + 1 //保证最少一个桶,这里的10可以根据实际情况做调整
+	var factor = 10                      // 决定桶数量大小的因子
+	var bucketCnt = (max-min)/factor + 1 // 保证最少一个桶,这里的10可以根据实际情况做调整
 
-	//初始化桶
+	// 初始化桶
 	var bucket = make([][]int, bucketCnt)
-	//将每个元素放进对应的桶里
+	// 将每个元素放进对应的桶里
 	for _, v := range data {
 		i := getBucketIndex(v, min, factor)
 		bucket[i] = append(bucket[i], v)
 	}
-	//然后对每个有元素的桶中的元素进行排序(排序方法任意，如插入排序), 同时将排好序的元素放回原数组中
+	// 然后对每个有元素的桶中的元素进行排序(排序方法任意，如插入排序), 同时将排好序的元素放回原数组中
 	var index int
 	for i := range bucket {
 		src := bucket[i]
 		if len(src) > 0 {
-			InsertSort(src)
+			Insert(src)
 			for j := range src {
 				data[index] = src[j]
 				index++
@@ -47,8 +47,8 @@ func BucketSort(data []int) {
 	}
 }
 
-//这里可以看出目标值越大，对应桶的索引也越大，所以后面的桶存放的元素一定比前面的桶存放的元素大。
-//将每个桶排好序后，直接合并每个桶的元素即为最终的排序结果
+// 这里可以看出目标值越大，对应桶的索引也越大，所以后面的桶存放的元素一定比前面的桶存放的元素大。
+// 将每个桶排好序后，直接合并每个桶的元素即为最终的排序结果
 func getBucketIndex(target, min, step int) int {
 	return (target - min) / step
 }

@@ -13,12 +13,12 @@ package sort
 	最终算法以步长为1进行排序。当步长为1时，算法变为普通插入排序，这就保证了数据一定会被排序。
 */
 
-func ShellSort(data []int) {
+func Shell(data []int) {
 	count := len(data)
 	if count <= 1 {
 		return
 	}
-	//最开始选取count/2为步长
+	// 最开始选取count/2为步长
 	step := count / 2
 	var key, pos int
 	for step > 0 {

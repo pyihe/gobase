@@ -16,14 +16,14 @@ package sort
 	注: 从算法不难看出，计数排序的对象必须是大于0的整数
 */
 
-//给定数组的最大值
-func CountingSort(data []int, max int) {
+// 给定数组的最大值
+func Counting(data []int, max int) {
 	var c = make([]int, max+1)
 
 	for _, v := range data {
 		c[v]++
 	}
-	//c中大于0的元素的索引即是data里的元素，即data中的元素按照索引顺序已经排好序，
+	// c中大于0的元素的索引即是data里的元素，即data中的元素按照索引顺序已经排好序，
 	// 接下来便是按着索引的顺序将c中值大于0的元素的索引存储近data中（存储c[i]次）
 	var startIndex int
 	for i := 0; i <= max; i++ {

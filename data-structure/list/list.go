@@ -2,7 +2,7 @@ package list
 
 type List interface {
 	// String 用于打印
-	// String() string
+	String() string
 
 	// Len 返回列表长度
 	Len() int
@@ -35,9 +35,9 @@ type List interface {
 	// op>0 删除op个与v相等的元素
 	RemoveByValue(v interface{}, op int) int
 
-	// Reverse 列表反转
+	// Reverse reverse the list(列表反转)
 	Reverse()
 
-	// Range 列表遍历， fn返回true终止遍历
+	// Range range the list and break when fn returns true(列表遍历， fn返回true终止遍历)
 	Range(fn func(i int, value interface{}) bool)
 }

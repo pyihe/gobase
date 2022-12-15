@@ -9,16 +9,16 @@ package sort
 	基准值的选择对排序性能有决定性影响。
 */
 
-//获取基准位置
+// 获取基准位置
 func getPivot(src []int, start, end int) int {
 	if len(src) <= end || start < 0 {
 		panic("invalid start or end value.")
 	}
-	index := start - 1 //用于存放最后返回的pivot
-	pivot := end       //选取最后一个元素为pivot
+	index := start - 1 // 用于存放最后返回的pivot
+	pivot := end       // 选取最后一个元素为pivot
 
 	for i := start; i < end; i++ {
-		if src[i] <= src[pivot] { //将所有比基准值小的移动到前面，这样大的都在后面
+		if src[i] <= src[pivot] { // 将所有比基准值小的移动到前面，这样大的都在后面
 			index++
 			src[index], src[i] = src[i], src[index]
 		}
@@ -31,30 +31,30 @@ func quickSort(data []int, start, end int) {
 	if start >= end {
 		return
 	}
-	//获取基准位置
+	// 获取基准位置
 	pivot := getPivot(data, start, end)
-	//递归对基准位置左右两边的元素排序
+	// 递归对基准位置左右两边的元素排序
 	quickSort(data, start, pivot-1)
 	quickSort(data, pivot+1, end)
 }
 
-//原地分割版本
-func QuickSort(data []int) {
+// Quick 原地分割版本
+func Quick(data []int) {
 	quickSort(data, 0, len(data)-1)
 }
 
-//快速排序(直接采用中间元素作为基准值，此方法需要额外的存储空间，相对而言，在空间复杂度上不可取)
+// QuickSort2 快速排序(直接采用中间元素作为基准值，此方法需要额外的存储空间，相对而言，在空间复杂度上不可取)
 func QuickSort2(data []int) []int {
 	count := len(data)
 	if count <= 0 {
 		return nil
 	}
 
-	//选择中间的数作为参考
+	// 选择中间的数作为参考
 	keyIndex := count / 2
 	key := data[keyIndex]
 
-	//分成左右两部分，左边放比key小的值，右边放比key大的值
+	// 分成左右两部分，左边放比key小的值，右边放比key大的值
 	left := make([]int, 0)
 	right := make([]int, 0)
 
@@ -72,7 +72,7 @@ func QuickSort2(data []int) []int {
 	left = QuickSort2(left)
 	right = QuickSort2(right)
 
-	//最后将得到的两组数组合起来
+	// 最后将得到的两组数组合起来
 	var result []int
 	result = append(result, left...)
 	result = append(result, key)
