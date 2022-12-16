@@ -11,6 +11,7 @@ data-structure, algorithm, design-pattern written in Go.
 ### [算法(algorithm)](https://github.com/pyihe/gobase/tree/master/algorithm)
 
 1. [排序(sort)](https://github.com/pyihe/gobase/tree/master/algorithm/sort)
+2. [KMP模式匹配(KMP SubString Search)](https://github.com/pyihe/gobase/tree/master/algorithm/kmp)
 
 ### [设计模式(design-pattern)](https://github.com/pyihe/gobase/tree/master/design-pattern)
 
