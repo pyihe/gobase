@@ -7,6 +7,7 @@ data-structure, algorithm, design-pattern written in Go.
 1. [列表(List)](https://github.com/pyihe/gobase/tree/master/data-structure/list)
 2. [队列(Queue)](https://github.com/pyihe/gobase/tree/master/data-structure/queue)
 3. [栈(Stack)](https://github.com/pyihe/gobase/tree/master/data-structure/stack)
+4. [树(Tree)](https://github.com/pyihe/gobase/tree/master/data-structure/tree)
 
 ### [算法(algorithm)](https://github.com/pyihe/gobase/tree/master/algorithm)
 
