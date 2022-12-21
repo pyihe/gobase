@@ -277,7 +277,8 @@ func DFSTraverse(root Node) (desc string) {
 
 		if rightChild := p.RightChild(); rightChild != nil {
 			s.PushBack(rightChild)
-		} else if leftChild := p.LeftChild(); leftChild != nil {
+		}
+		if leftChild := p.LeftChild(); leftChild != nil {
 			s.PushBack(leftChild)
 		}
 	}
