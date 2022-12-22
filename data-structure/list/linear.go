@@ -2,7 +2,6 @@ package list
 
 import (
 	"fmt"
-	"reflect"
 )
 
 const (
@@ -12,8 +11,8 @@ const (
 // 切片构成的线性表(顺序存储)
 
 type LinearList struct {
-	initSize int           // 列表初始容量
-	elements []interface{} // 列表元素
+	initSize int        // 列表初始容量
+	elements []*Element // 列表元素
 }
 
 func NewLinearList(size int) *LinearList {
@@ -21,13 +20,22 @@ func NewLinearList(size int) *LinearList {
 		size = defaultInitSize
 	}
 	return &LinearList{
-		elements: make([]interface{}, 0, size),
+		elements: make([]*Element, 0, size),
 		initSize: size,
 	}
 }
 
 func (l *LinearList) String() (desc string) {
-	return fmt.Sprintf("{initSize: %d, elements: %v", l.initSize, l.elements)
+	desc = fmt.Sprintf("{initSize: %d, elements: [", l.initSize)
+	for i, e := range l.elements {
+		switch {
+		case i == 0:
+			desc = fmt.Sprintf("%s%v", desc, e.value)
+		default:
+			desc = fmt.Sprintf("%s, %v", desc, e.value)
+		}
+	}
+	return fmt.Sprintf("%s]", desc)
 }
 
 // Len 获取列表长度
@@ -37,38 +45,16 @@ func (l *LinearList) Len() int {
 
 // Clear 清空列表
 func (l *LinearList) Clear() {
-	l.elements = make([]interface{}, 0, l.initSize)
+	l.elements = make([]*Element, 0, l.initSize)
 }
 
-// Value 获取位置i处的元素
-func (l *LinearList) Value(i int) (v interface{}, ok bool) {
+// Get 获取位置i处的元素
+func (l *LinearList) Get(i int) (e *Element) {
 	n := len(l.elements)
 	if i < 0 || i >= n {
 		return
 	}
-	v = l.elements[i]
-	ok = true
-	return
-}
-
-// Locate 找出与v相等的元素
-// op 默认找出一个相等的元素，为负数表示找出所有相等的元素，否则找出op对应个数的元素
-func (l *LinearList) Locate(v interface{}, op int) (locations []int) {
-	if op == 0 {
-		op = 1
-	}
-	// 预分配
-	locations = make([]int, 0, len(l.elements))
-
-	for i, e := range l.elements {
-		if !reflect.DeepEqual(e, v) {
-			continue
-		}
-		locations = append(locations, i)
-		if len(locations) == op {
-			break
-		}
-	}
+	e = l.elements[i]
 	return
 }
 
@@ -76,11 +62,16 @@ func (l *LinearList) Locate(v interface{}, op int) (locations []int) {
 // op 为0表示在位置i插入元素
 // op为正数表示在i后面插入元素
 // op为负数表示在i前面插入元素
-func (l *LinearList) Insert(i int, v interface{}, op int) bool {
+func (l *LinearList) Insert(i int, v interface{}, op int) *Element {
 	n := len(l.elements)
-	if i < 0 || i > n {
-		return false
+	if i < 0 {
+		i = 0
 	}
+	if i >= n {
+		i = n - 1
+	}
+
+	ele := &Element{v}
 
 	// 需要扩容
 	l.expansion()
@@ -89,24 +80,24 @@ func (l *LinearList) Insert(i int, v interface{}, op int) bool {
 	switch {
 	case op <= 0: // 在i前面插入
 		copy(l.elements[i+1:], l.elements[i:])
-		l.elements[i] = v
+		l.elements[i] = ele
 	case op > 0: // 在i后面插入
 		if n == 0 || i == n {
-			l.elements[n] = v
+			l.elements[n] = ele
 		} else {
 			copy(l.elements[i+2:], l.elements[i+1:])
-			l.elements[i+1] = v
+			l.elements[i+1] = ele
 		}
 	}
 
-	return true
+	return ele
 }
 
 // RemoveByLocate 删除位置i处的元素
-func (l *LinearList) RemoveByLocate(i int) (interface{}, bool) {
+func (l *LinearList) RemoveByLocate(i int) *Element {
 	n := len(l.elements)
 	if i < 0 || i >= n {
-		return nil, false
+		return nil
 	}
 
 	// 是否需要缩容
@@ -121,37 +112,28 @@ func (l *LinearList) RemoveByLocate(i int) (interface{}, bool) {
 	l.elements[n-1] = nil
 	// 去掉最后一个元素
 	l.elements = l.elements[:n-1]
-	return v, true
+	return v
 }
 
-// RemoveByValue 删除与元素v相等的元素
+// Remove 删除与元素v相等的元素
 // 默认删除一次
 // op小于0表示删除所有与v相等的元素
 // op大于0表示删除与v相等的元素op次
 // 返回实际删除的次数
-func (l *LinearList) RemoveByValue(v interface{}, op int) (count int) {
-	if op == 0 {
-		op = 1
-	}
+func (l *LinearList) Remove(e *Element) {
 	n := len(l.elements)
 	l.shrink()
 
 	for i := 0; i < n; i++ {
 		element := l.elements[i]
-		if !reflect.DeepEqual(element, v) {
+		if element != e {
 			continue
 		}
 		copy(l.elements[i:], l.elements[i+1:])
 		l.elements[n-1] = nil
 		l.elements = l.elements[:n-1]
-		count += 1
-		if op > 0 && count == op {
-			break
-		}
-		// i被删除后，i+1以及之后的元素位置前移1，此时需要重新从i开始遍历，同时总的遍历次数减1
-		i, n = i-1, n-1
+		break
 	}
-	return
 }
 
 // Reverse 列表反转
@@ -164,7 +146,7 @@ func (l *LinearList) Reverse() {
 }
 
 // Range 遍历列表
-func (l *LinearList) Range(fn func(i int, value interface{}) bool) {
+func (l *LinearList) Range(fn func(i int, e *Element) bool) {
 	for i, v := range l.elements {
 		if fn(i, v) {
 			break
@@ -176,7 +158,7 @@ func (l *LinearList) shrink() {
 	c := cap(l.elements)
 	n := len(l.elements)
 	if n < (c/2) && c >= 2*l.initSize {
-		nList := make([]interface{}, n, c/2)
+		nList := make([]*Element, n, c/2)
 		copy(nList, l.elements)
 		l.elements = nList
 	}
@@ -186,7 +168,7 @@ func (l *LinearList) expansion() {
 	n := len(l.elements)
 	c := cap(l.elements)
 	if n > 0 && n+1 > c {
-		nList := make([]interface{}, n, c*2)
+		nList := make([]*Element, n, c*2)
 		copy(nList, l.elements)
 		l.elements = nList
 	}

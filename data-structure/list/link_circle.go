@@ -2,12 +2,11 @@ package list
 
 import (
 	"fmt"
-	"reflect"
 )
 
 type CircleLink struct {
 	head   *singleNode
-	tail   *singleNode
+	rear   *singleNode
 	length int
 }
 
@@ -19,9 +18,9 @@ func (l *CircleLink) String() (desc string) {
 	i, p := 0, l.head
 	for p != nil && i < l.length {
 		if desc == "" {
-			desc = fmt.Sprintf("%v", p.value)
+			desc = fmt.Sprintf("%v", p.element.value)
 		} else {
-			desc = fmt.Sprintf("%s->%v", desc, p.value)
+			desc = fmt.Sprintf("%s->%v", desc, p.element.value)
 		}
 		i += 1
 		p = p.next
@@ -37,7 +36,7 @@ func (l *CircleLink) Clear() {
 	*l = CircleLink{}
 }
 
-func (l *CircleLink) Value(i int) (v interface{}, ok bool) {
+func (l *CircleLink) Get(i int) (e *Element) {
 	if i < 0 || i >= l.length {
 		return
 	}
@@ -47,36 +46,17 @@ func (l *CircleLink) Value(i int) (v interface{}, ok bool) {
 		p = p.next
 	}
 	if p != nil && j == i {
-		v = p.value
-		ok = true
+		e = p.element
 	}
 	return
 }
 
-func (l *CircleLink) Locate(v interface{}, op int) (locations []int) {
-	if op == 0 {
-		op = 1
+func (l *CircleLink) Insert(i int, v interface{}, op int) *Element {
+	if i < 0 {
+		i = 0
 	}
-	locations = make([]int, 0, l.length)
-	j, p := 0, l.head
-	for p != nil && j < l.length {
-		if !reflect.DeepEqual(p.value, v) {
-			goto step
-		}
-		locations = append(locations, j)
-		if len(locations) == op {
-			break
-		}
-	step:
-		j += 1
-		p = p.next
-	}
-	return
-}
-
-func (l *CircleLink) Insert(i int, v interface{}, op int) bool {
-	if i < 0 || i > l.length {
-		return false
+	if i >= l.length {
+		i = l.length - 1
 	}
 	if op <= 0 {
 		i -= 1
@@ -86,38 +66,43 @@ func (l *CircleLink) Insert(i int, v interface{}, op int) bool {
 		j += 1
 		p = p.next
 	}
+
+	e := &Element{v}
 	switch {
-	case i == -1:
-		ele := &singleNode{value: v}
-		if l.head == nil {
-			ele.next = ele
+	case i == -1: // i == -1表示插入位置在头节点前面
+		ele := &singleNode{element: e}
+		if l.head == nil { // 插入第一个节点, 头尾指针都指向一个节点，next也指向自己
 			l.head = ele
-			l.tail = ele
+			l.rear = ele
+			ele.next = ele
 		} else {
 			ele.next = l.head
 			l.head = ele
-			l.tail.next = l.head
+			l.rear.next = l.head
 		}
 		l.length += 1
-		return true
+		return e
 	case j == i:
-		ele := &singleNode{value: v}
-		if p == nil {
-			ele.next = ele
+		ele := &singleNode{element: e}
+		if p == nil { // 插入的是第一个节点
 			l.head = ele
-			l.tail = ele
+			l.rear = ele
+			ele.next = ele
 		} else {
 			ele.next = p.next
 			p.next = ele
+			if ele.next == l.head {
+				l.rear = ele
+			}
 		}
 		l.length += 1
-		return true
+		return e
 	default:
-		return false
+		return nil
 	}
 }
 
-func (l *CircleLink) RemoveByLocate(i int) (v interface{}, ok bool) {
+func (l *CircleLink) RemoveByLocate(i int) (e *Element) {
 	if i < 0 || i >= l.length {
 		return
 	}
@@ -129,22 +114,20 @@ func (l *CircleLink) RemoveByLocate(i int) (v interface{}, ok bool) {
 		p = p.next
 	}
 	switch {
-	case i == -1:
-		v = l.head.value
-		ok = true
-		if l.head == l.tail {
+	case i == -1: // 删除的是头节点
+		e = l.head.element
+		if l.head == l.rear {
 			l.head = nil
-			l.tail = nil
+			l.rear = nil
 		} else {
 			l.head = l.head.next
-			l.tail.next = l.head
+			l.rear.next = l.head
 		}
 		l.length -= 1
 		return
 	case p != nil && j == i:
-		v = p.next.value
-		ok = true
-		p.next.value = nil
+		e = p.next.element
+		p.next.element = nil
 		p.next = p.next.next
 		p.next.next = nil
 		l.length -= 1
@@ -154,19 +137,13 @@ func (l *CircleLink) RemoveByLocate(i int) (v interface{}, ok bool) {
 	}
 }
 
-func (l *CircleLink) RemoveByValue(v interface{}, op int) (count int) {
-	if op == 0 {
-		op = 1
-	}
+func (l *CircleLink) Remove(v *Element) {
 	var (
 		p   = l.head
 		pre *singleNode
 	)
 	for p != nil {
-		if count == op {
-			break
-		}
-		if !reflect.DeepEqual(p.value, v) {
+		if p.element != v {
 			pre = p
 			p = p.next
 			goto step
@@ -174,19 +151,17 @@ func (l *CircleLink) RemoveByValue(v interface{}, op int) (count int) {
 		switch {
 		case pre == nil:
 			l.head = p.next
-			l.tail.next = l.head
+			l.rear.next = l.head
 			l.length -= 1
-			p.value = nil
+			p.element = nil
 			p.next = nil
 			p = l.head
-			count += 1
 		default:
 			pre.next = p.next
 			p.next = nil
-			p.value = nil
+			p.element = nil
 			p = pre.next
 			l.length -= 1
-			count += 1
 		}
 	step:
 		if p == l.head {
@@ -205,7 +180,7 @@ func (l *CircleLink) Reverse() {
 	)
 	for p != nil && j < l.length {
 		if p.next == l.head {
-			l.tail = l.head
+			l.rear = l.head
 			l.head = p
 		}
 		next = p.next
@@ -215,10 +190,10 @@ func (l *CircleLink) Reverse() {
 	}
 }
 
-func (l *CircleLink) Range(fn func(i int, value interface{}) bool) {
+func (l *CircleLink) Range(fn func(i int, e *Element) bool) {
 	j, p := 0, l.head
 	for p != nil && j < l.length {
-		if fn(j, p.value) {
+		if fn(j, p.element) {
 			break
 		}
 		j += 1
@@ -234,11 +209,11 @@ func (l *CircleLink) Merge(list *CircleLink) {
 
 	if l.length == 0 {
 		l.head = list.head
-		l.tail = list.tail
+		l.rear = list.rear
 		return
 	}
 
-	l.tail.next = list.head
-	list.tail.next = l.head
-	l.tail = list.tail
+	l.rear.next = list.head
+	list.rear.next = l.head
+	l.rear = list.rear
 }

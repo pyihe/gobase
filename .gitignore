@@ -15,5 +15,4 @@
 # vendor/
 
 .idea
-*_test.go
 .DS_Store

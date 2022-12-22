@@ -2,13 +2,12 @@ package list
 
 import (
 	"fmt"
-	"reflect"
 )
 
 // element
 type staticNode struct {
-	value interface{} // 数据域
-	next  int         // 指针域
+	element *Element // 数据域
+	next    int      // 指针域
 }
 
 /*
@@ -41,7 +40,7 @@ func (l *StaticLink) init() {
 		if l.nodes[i] == nil {
 			l.nodes[i] = &staticNode{}
 		}
-		l.nodes[i].value = nil
+		l.nodes[i].element = nil
 		switch i {
 		case l.initSize - 1: // 数据链表的头指针, 初始状态下指向空
 			l.nodes[i].next = 0
@@ -84,7 +83,7 @@ func (l *StaticLink) getNextSpare() (i int) {
 		if l.nodes[j] == nil {
 			l.nodes[j] = &staticNode{}
 		}
-		l.nodes[j].value = nil
+		l.nodes[j].element = nil
 		switch j {
 		case len(l.nodes) - 2:
 			l.nodes[j].next = 0
@@ -114,10 +113,9 @@ func (l *StaticLink) shrink() {
 		case p != 0:
 			nod := l.nodes[p]
 			p = nod.next
-			// fmt.Printf("%+v, %v\n", nod, p)
 			nList[i] = &staticNode{
-				value: nod.value,
-				next:  i + 1,
+				element: nod.element,
+				next:    i + 1,
 			}
 			if i == l.initSize-2 {
 				nList[i].next = 0
@@ -144,7 +142,7 @@ func (l *StaticLink) shrink() {
 }
 
 func (l *StaticLink) free(j int) {
-	l.nodes[j].value = nil
+	l.nodes[j].element = nil
 	l.nodes[j].next = l.nodes[0].next
 	l.nodes[0].next = j
 }
@@ -155,9 +153,9 @@ func (l *StaticLink) String() (desc string) {
 	for p != 0 && i < l.length {
 		nod := l.nodes[p]
 		if i == 0 {
-			desc = fmt.Sprintf("%s%v", desc, nod.value)
+			desc = fmt.Sprintf("%s%v", desc, nod.element.value)
 		} else {
-			desc = fmt.Sprintf("%s->%v", desc, nod.value)
+			desc = fmt.Sprintf("%s->%v", desc, nod.element.value)
 		}
 		i += 1
 		p = nod.next
@@ -174,15 +172,14 @@ func (l *StaticLink) Clear() {
 	l.init()
 }
 
-func (l *StaticLink) Value(i int) (v interface{}, ok bool) {
+func (l *StaticLink) Get(i int) (e *Element) {
 	if i < 0 || i >= l.length {
 		return
 	}
 	j, p := -1, len(l.nodes)-1
 	for p != 0 {
 		if j == i {
-			v = l.nodes[p].value
-			ok = true
+			e = l.nodes[p].element
 			break
 		}
 		j += 1
@@ -191,31 +188,9 @@ func (l *StaticLink) Value(i int) (v interface{}, ok bool) {
 	return
 }
 
-func (l *StaticLink) Locate(v interface{}, op int) (locations []int) {
-	if op == 0 {
-		op = 1
-	}
-
-	locations = make([]int, 0, l.length)
-	j, p := -1, len(l.nodes)-1
-	for p != 0 {
-		// j大于0表示不是头节点（头节点不存放数据）
-		nod := l.nodes[p]
-		if j >= 0 && reflect.DeepEqual(nod.value, v) {
-			locations = append(locations, j)
-			if len(locations) == op {
-				break
-			}
-		}
-		j += 1
-		p = l.nodes[p].next
-	}
-	return
-}
-
-func (l *StaticLink) Insert(i int, v interface{}, op int) bool {
+func (l *StaticLink) Insert(i int, v interface{}, op int) *Element {
 	if i < 0 || i > l.length {
-		return false
+		return nil
 	}
 
 	if op <= 0 {
@@ -230,7 +205,8 @@ func (l *StaticLink) Insert(i int, v interface{}, op int) bool {
 	// 将v保存在位置pos处的节点中
 	sparePos := l.getNextSpare()
 	n := len(l.nodes)
-	l.nodes[sparePos].value = v
+	ele := &Element{v}
+	l.nodes[sparePos].element = ele
 	l.nodes[sparePos].next = 0
 
 	switch {
@@ -253,12 +229,12 @@ func (l *StaticLink) Insert(i int, v interface{}, op int) bool {
 		}
 		l.length += 1
 	}
-	return true
+	return ele
 }
 
-func (l *StaticLink) RemoveByLocate(i int) (v interface{}, ok bool) {
+func (l *StaticLink) RemoveByLocate(i int) (e *Element) {
 	if i < 0 || i >= l.length {
-		return
+		return nil
 	}
 
 	// 要删除节点i，则需要找到i的前驱节点
@@ -273,18 +249,13 @@ func (l *StaticLink) RemoveByLocate(i int) (v interface{}, ok bool) {
 	l.nodes[k].next = l.nodes[target].next
 	l.free(target)
 	l.length -= 1
-	v = l.nodes[target].value
-	ok = true
-	l.nodes[target].value = nil
+	e = l.nodes[target].element
+	l.nodes[target].element = nil
 	l.shrink()
 	return
 }
 
-func (l *StaticLink) RemoveByValue(v interface{}, op int) (count int) {
-	if op == 0 {
-		op = 1
-	}
-
+func (l *StaticLink) Remove(v *Element) {
 	var (
 		n   = len(l.nodes)
 		p   = l.nodes[n-1].next
@@ -292,11 +263,8 @@ func (l *StaticLink) RemoveByValue(v interface{}, op int) (count int) {
 	)
 
 	for p != 0 {
-		if op > 0 && count == op {
-			break
-		}
 		nod := l.nodes[p]
-		if !reflect.DeepEqual(nod.value, v) {
+		if nod.element != v {
 			pre = nod
 			p = nod.next
 			continue
@@ -309,14 +277,12 @@ func (l *StaticLink) RemoveByValue(v interface{}, op int) (count int) {
 			p = next
 			l.nodes[n-1].next = p
 			l.length -= 1
-			count += 1
 		default:
 			next := nod.next
 			l.free(p)
 			p = next
 			pre.next = next
 			l.length -= 1
-			count += 1
 		}
 	}
 
@@ -344,12 +310,12 @@ func (l *StaticLink) Reverse() {
 	}
 }
 
-func (l *StaticLink) Range(fn func(i int, value interface{}) bool) {
+func (l *StaticLink) Range(fn func(i int, value *Element) bool) {
 	n := len(l.nodes)
 	i, p := 0, l.nodes[n-1].next
 	for p != 0 {
 		nod := l.nodes[p]
-		if fn(i, nod.value) {
+		if fn(i, nod.element) {
 			break
 		}
 		i += 1

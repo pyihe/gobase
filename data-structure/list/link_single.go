@@ -2,14 +2,13 @@ package list
 
 import (
 	"fmt"
-	"reflect"
 )
 
 /*单向链表构成的列表(链式存储)*/
 
 type singleNode struct {
-	value interface{} // 数据域
-	next  *singleNode // 指针域
+	element *Element    // 数据域
+	next    *singleNode // 指针域
 }
 
 type SingleLink struct {
@@ -25,9 +24,9 @@ func (l *SingleLink) String() (desc string) {
 	p := l.head
 	for p != nil {
 		if desc == "" {
-			desc = fmt.Sprintf("%v", p.value)
+			desc = fmt.Sprintf("%v", p.element.value)
 		} else {
-			desc = fmt.Sprintf("%s->%v", desc, p.value)
+			desc = fmt.Sprintf("%s->%v", desc, p.element.value)
 		}
 		p = p.next
 	}
@@ -45,18 +44,17 @@ func (l *SingleLink) Clear() {
 	l.head = nil
 }
 
-// Value 获取位置i处的元素
-func (l *SingleLink) Value(i int) (v interface{}, ok bool) {
+// Get 获取位置i处的元素
+func (l *SingleLink) Get(i int) (e *Element) {
 	if i < 0 || i >= l.length {
-		return
+		return nil
 	}
 
 	j, p := 0, l.head
 
 	for p != nil {
 		if j == i {
-			v = p.value
-			ok = true
+			e = p.element
 			break
 		}
 		j += 1
@@ -65,30 +63,9 @@ func (l *SingleLink) Value(i int) (v interface{}, ok bool) {
 	return
 }
 
-func (l *SingleLink) Locate(v interface{}, op int) (locations []int) {
-	if op == 0 {
-		op = 1
-	}
-
-	locations = make([]int, 0, l.length)
-	j, p := 0, l.head
-
-	for p != nil {
-		if reflect.DeepEqual(p.value, v) {
-			locations = append(locations, j)
-			if len(locations) == op {
-				break
-			}
-		}
-		j += 1
-		p = p.next
-	}
-	return
-}
-
-func (l *SingleLink) Insert(i int, v interface{}, op int) bool {
+func (l *SingleLink) Insert(i int, v interface{}, op int) *Element {
 	if i < 0 || i > l.length {
-		return false
+		return nil
 	}
 
 	// 根据插入位置和插入方向获取新节点的前驱节点所处的位置
@@ -104,15 +81,17 @@ func (l *SingleLink) Insert(i int, v interface{}, op int) bool {
 		j += 1
 		p = p.next
 	}
+
+	e := &Element{v}
 	switch {
 	case i == -1: // 插入的是头节点
-		ele := &singleNode{value: v}
+		ele := &singleNode{element: e}
 		ele.next = l.head
 		l.head = ele
 		l.length += 1
-		return true
+		return e
 	case j == i: // 找到了前驱节点
-		ele := &singleNode{value: v}
+		ele := &singleNode{element: e}
 		if p == nil { // 插入的是头节点
 			ele.next = l.head
 			l.head = ele
@@ -121,14 +100,14 @@ func (l *SingleLink) Insert(i int, v interface{}, op int) bool {
 			p.next = ele
 		}
 		l.length += 1
-		return true
+		return e
 	default:
-		return false
+		return nil
 	}
 }
 
 // RemoveByLocate 根据位置删除元素
-func (l *SingleLink) RemoveByLocate(i int) (v interface{}, ok bool) {
+func (l *SingleLink) RemoveByLocate(i int) (e *Element) {
 	if i < 0 || i >= l.length {
 		return
 	}
@@ -141,15 +120,13 @@ func (l *SingleLink) RemoveByLocate(i int) (v interface{}, ok bool) {
 	}
 	switch {
 	case i == -1: // 删除的是头节点
-		v = l.head.value
-		ok = true
+		e = l.head.element
 		l.head = l.head.next
 		l.length -= 1
 		return
 	case p != nil && j == i: // 找到了前驱节点
-		v = p.next.value
-		ok = true
-		p.next.value = nil
+		e = p.next.element
+		p.next.element = nil
 		p.next = p.next.next
 		l.length -= 1
 		return
@@ -158,48 +135,38 @@ func (l *SingleLink) RemoveByLocate(i int) (v interface{}, ok bool) {
 	}
 }
 
-// RemoveByValue 删除与元素v相等的元素
+// Remove 删除与元素v相等的元素
 // 默认删除一次
 // op小于0表示删除所有与v相等的元素
 // op大于0表示删除与v相等的元素op次
 // 返回实际删除的次数
-func (l *SingleLink) RemoveByValue(v interface{}, op int) (count int) {
-	if op == 0 {
-		op = 1
-	}
-
+func (l *SingleLink) Remove(element *Element) {
 	var (
 		p   = l.head
 		pre *singleNode
 	)
 
 	for p != nil {
-		// 已经删除了指定个数的元素
-		if count == op {
-			break
-		}
-		if !reflect.DeepEqual(p.value, v) {
-			pre = p    // 赋值前驱节点
-			p = p.next // 自增为后继节点
+		if p.element != element {
+			pre = p
+			p = p.next
 			continue
 		}
-
 		switch {
 		case pre == nil: // 没有前驱节点，证明是头节点
 			p = p.next
 			l.head.next = nil
 			l.head = p
 			l.length -= 1
-			count += 1
 
 		default:
 			pre.next = p.next
 			p.next = nil
-			p.value = nil
+			p.element = nil
 			p = pre.next
 			l.length -= 1
-			count += 1
 		}
+		break
 	}
 	return
 }
@@ -239,10 +206,10 @@ func (l *SingleLink) Reverse() {
 }
 
 // Range 遍历链表
-func (l *SingleLink) Range(fn func(i int, value interface{}) bool) {
+func (l *SingleLink) Range(fn func(i int, e *Element) bool) {
 	i, p := 0, l.head
 	for p != nil {
-		if fn(i, p.value) {
+		if fn(i, p.element) {
 			break
 		}
 		i += 1
