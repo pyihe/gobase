@@ -174,35 +174,19 @@ func (l *SingleLink) Remove(element *Element) {
 // Reverse 链表翻转
 func (l *SingleLink) Reverse() {
 	var (
-		p    = l.head    // 当前正在遍历的节点
-		pre  *singleNode // 当前节点的前驱节点
-		next *singleNode // 当前节点的后继节点
+		p   = l.head    // 当前正在遍历的节点
+		pre *singleNode // 当前节点的前驱节点
 	)
 
 	for p != nil {
 		if p.next == nil {
 			l.head = p
 		}
-		next = p.next
+		next := p.next // 当前节点的后继节点
 		p.next = pre
 		pre = p
 		p = next
 	}
-
-	// 头插法
-	// var (
-	// 	newTail *singleNode
-	// 	p       = l.head
-	// )
-	// for p != nil {
-	// 	if p.next == nil {
-	// 		l.head = p
-	// 	}
-	// 	next := p.next
-	// 	p.next = newTail
-	// 	newTail = p
-	// 	p = next
-	// }
 }
 
 // Range 遍历链表

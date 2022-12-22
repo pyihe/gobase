@@ -126,11 +126,14 @@ func (l *CircleLink) RemoveByLocate(i int) (e *Element) {
 		l.length -= 1
 		return
 	case p != nil && j == i:
-		e = p.next.element
-		p.next.element = nil
-		p.next = p.next.next
-		p.next.next = nil
+		rmEle := p.next
+		e = rmEle.element
+		p.next = rmEle.next
+		rmEle.next = nil
 		l.length -= 1
+		if p.next == l.head {
+			l.rear = p
+		}
 		return
 	default:
 		return
@@ -140,33 +143,34 @@ func (l *CircleLink) RemoveByLocate(i int) (e *Element) {
 func (l *CircleLink) Remove(v *Element) {
 	var (
 		p   = l.head
-		pre *singleNode
+		pre = l.rear
+		j   = 0
 	)
-	for p != nil {
+	for p != nil && j < l.length {
 		if p.element != v {
 			pre = p
 			p = p.next
-			goto step
+			j += 1
+			continue
 		}
-		switch {
-		case pre == nil:
-			l.head = p.next
-			l.rear.next = l.head
-			l.length -= 1
-			p.element = nil
-			p.next = nil
-			p = l.head
-		default:
+
+		if l.length == 1 {
+			l.head = nil
+			l.rear = nil
+		} else {
 			pre.next = p.next
 			p.next = nil
-			p.element = nil
-			p = pre.next
-			l.length -= 1
+			// 删除的是头节点
+			if pre == l.rear {
+				l.head = pre.next
+			}
+			// 删除的是尾节点
+			if pre.next == l.head {
+				l.rear = pre
+			}
 		}
-	step:
-		if p == l.head {
-			break
-		}
+		l.length -= 1
+		break
 	}
 	return
 }
