@@ -2,6 +2,8 @@ package tree
 
 import (
 	"fmt"
+
+	"github.com/pyihe/gobase/pkg"
 )
 
 /*
@@ -10,30 +12,22 @@ import (
 
 /**********************************************************************************************************************/
 
-// BSTNode 二叉搜索平衡树节点
-type BSTNode struct {
-	initial    bool     // 必须通过New方法构建
+// bstNode 二叉搜索平衡树节点
+type bstNode struct {
 	depth      int      // 节点所处深度
 	element    Element  // 元素
-	parent     *BSTNode // 父节点
-	leftChild  *BSTNode // 左孩子
-	rightChild *BSTNode // 右孩子
+	parent     *bstNode // 父节点
+	leftChild  *bstNode // 左孩子
+	rightChild *bstNode // 右孩子
 }
 
-func NewBSTNode(e Element) *BSTNode {
-	return &BSTNode{
+func newBSTNode(e Element) *bstNode {
+	return &bstNode{
 		element: e,
-		initial: true,
 	}
 }
 
-func (node *BSTNode) assert() {
-	if !node.initial {
-		panic("node not init correctly")
-	}
-}
-
-func (node *BSTNode) isZero() bool {
+func (node *bstNode) isZero() bool {
 	if node.depth != 0 {
 		return false
 	}
@@ -43,28 +37,20 @@ func (node *BSTNode) isZero() bool {
 	if node.leftChild != nil || node.rightChild != nil {
 		return false
 	}
-	return !node.initial
+	return true
 }
 
-func (node *BSTNode) reset() {
-	*node = BSTNode{
-		initial: true,
-	}
-}
-
-func (node *BSTNode) String() string {
+func (node *bstNode) String() string {
 	if node == nil {
 		return "<nil>"
 	}
-	node.assert()
-	return fmt.Sprintf("(value: %v, depth: %d)", node.element.Value(), node.depth)
+	return fmt.Sprintf("%v", node.element.Value())
 }
 
-func (node *BSTNode) Data() Element {
+func (node *bstNode) Data() Element {
 	if node == nil {
 		return nil
 	}
-	node.assert()
 	if node.element == nil {
 		return nil
 	}
@@ -72,12 +58,11 @@ func (node *BSTNode) Data() Element {
 }
 
 // Root 返回自己所在树的根节点
-func (node *BSTNode) Root() Node {
+func (node *bstNode) Root() Node {
 	if node == nil {
 		return nil
 	}
 
-	node.assert()
 	p := node
 	for p.parent != nil {
 		p = p.parent
@@ -86,102 +71,85 @@ func (node *BSTNode) Root() Node {
 }
 
 // LeftChild 返回自己的左子树
-func (node *BSTNode) LeftChild() Node {
-	if node == nil {
-		return nil
-	}
-
-	node.assert()
-	if node.leftChild == nil {
+func (node *bstNode) LeftChild() Node {
+	if node == nil || node.leftChild == nil {
 		return nil
 	}
 	return node.leftChild
 }
 
 // RightChild 返回自己的右子树
-func (node *BSTNode) RightChild() Node {
-	if node == nil {
-		return nil
-	}
-	node.assert()
-	if node.rightChild == nil {
+func (node *bstNode) RightChild() Node {
+	if node == nil || node.rightChild == nil {
 		return nil
 	}
 	return node.rightChild
 }
 
-// RightSibling 返回节点的右兄弟, 可能是自己
-func (node *BSTNode) RightSibling() Node {
+// RightSibling 只有当自己不是右兄弟节点且右兄弟节点非空时才返回非nil
+func (node *bstNode) RightSibling() Node {
 	if node == nil {
 		return nil
 	}
-	node.assert()
-
 	parent := node.parent
-	if parent != nil {
-		return parent.rightChild
+	// 如果自己就是父节点的右孩子，则右兄弟为nil
+	if parent == nil || parent.rightChild == nil || node == parent.rightChild {
+		return nil
 	}
-	return nil
+	return parent.rightChild
 }
 
-// LeftSibling 返回节点的左兄弟, 可能是自己
-func (node *BSTNode) LeftSibling() Node {
+// LeftSibling 只有当自己不是左兄弟节点且左兄弟节点非空时才返回非nil
+func (node *bstNode) LeftSibling() Node {
 	if node == nil {
 		return nil
 	}
-	node.assert()
 	parent := node.parent
-	if parent != nil {
-		return parent.leftChild
+	if parent == nil || parent.leftChild == nil || node == parent.leftChild {
+		return nil
 	}
-	return nil
+	return parent.leftChild
 }
 
-func (node *BSTNode) Parent() Node {
-	if node == nil {
-		return nil
-	}
-	node.assert()
-	if node.parent == nil {
+func (node *bstNode) Parent() Node {
+	if node == nil || node.parent == nil {
 		return nil
 	}
 	return node.parent
 }
 
-func (node *BSTNode) Depth() int {
+func (node *bstNode) Height() int {
 	if node == nil {
 		return 0
 	}
-	node.assert()
-	return node.depth
-}
-
-func (node *BSTNode) Color() Color {
-	if node == nil {
-		return NoColor
-	}
-	node.assert()
-	return NoColor
-}
-
-func (node *BSTNode) getDepth() int {
-	node.assert()
-
 	switch {
 	case node.leftChild == nil && node.rightChild == nil:
 		return 1
 	case node.leftChild != nil && node.rightChild == nil:
-		return 1 + node.leftChild.getDepth()
+		return 1 + node.leftChild.Height()
 	case node.leftChild == nil && node.rightChild != nil:
-		return 1 + node.rightChild.getDepth()
+		return 1 + node.rightChild.Height()
 	default:
-		return 1 + maxInt(node.leftChild.getDepth(), node.rightChild.getDepth())
+		return 1 + pkg.MaxInt(node.leftChild.Height(), node.rightChild.Height())
 	}
 }
 
+func (node *bstNode) Depth() int {
+	if node == nil {
+		return 0
+	}
+	return node.depth
+}
+
+func (node *bstNode) Color() Color {
+	if node == nil {
+		return NoColor
+	}
+	return NoColor
+}
+
 // maxNode 获取node的最大子孙节点，包括自己
-func (node *BSTNode) maxNode() *BSTNode {
-	node.assert()
+func (node *bstNode) maxNode() *bstNode {
 	p := node
 	for p.rightChild != nil {
 		p = p.rightChild
@@ -190,8 +158,7 @@ func (node *BSTNode) maxNode() *BSTNode {
 }
 
 // minNode 获取node的最小子孙节点，包括自己
-func (node *BSTNode) minNode() *BSTNode {
-	node.assert()
+func (node *bstNode) minNode() *bstNode {
 	p := node
 	for p.leftChild != nil {
 		p = p.leftChild
@@ -199,13 +166,11 @@ func (node *BSTNode) minNode() *BSTNode {
 	return p
 }
 
-func (node *BSTNode) insert(element Element) *BSTNode {
-	node.assert()
-
+func (node *bstNode) insert(element Element) *bstNode {
 	var (
 		cmp        = 0
 		p          = node
-		rookieNode = NewBSTNode(element)
+		rookieNode = newBSTNode(element)
 	)
 
 loop:
@@ -236,8 +201,7 @@ loop:
 	return rookieNode
 }
 
-func (node *BSTNode) remove(element Element) bool {
-	node.assert()
+func (node *bstNode) remove(element Element) bool {
 	p := node
 loop:
 	for p != nil {
@@ -273,7 +237,7 @@ loop:
 	default: // 被删除节点没有孩子节点，直接删除该节点
 		if p.parent == nil {
 			// 头节点
-			p.reset()
+			*p = bstNode{}
 		} else {
 			if p.parent.leftChild == p {
 				p.parent.leftChild = nil
@@ -285,8 +249,7 @@ loop:
 	return true
 }
 
-func (node *BSTNode) update(old, element Element) bool {
-	node.assert()
+func (node *bstNode) update(old, element Element) bool {
 	// 1. 旧值不存在，返回删除失败
 	oNode := node.find(old)
 	if oNode == nil {
@@ -306,8 +269,7 @@ func (node *BSTNode) update(old, element Element) bool {
 	return node.insert(element) != nil
 }
 
-func (node *BSTNode) find(element Element) *BSTNode {
-	node.assert()
+func (node *bstNode) find(element Element) *bstNode {
 	p := node
 loop:
 	for p != nil {
@@ -334,7 +296,7 @@ loop:
 
 // BST 二叉搜索平衡树
 type BST struct {
-	root *BSTNode // 根节点
+	root *bstNode // 根节点
 }
 
 func NewBST() *BST {
@@ -354,10 +316,10 @@ func (tree *BST) Root() Node {
 
 // Depth 返回树的深度
 func (tree *BST) Depth() int {
-	if tree == nil || tree.root == nil {
+	if tree == nil || tree.root == nil || tree.root.isZero() {
 		return 0
 	}
-	return tree.root.getDepth()
+	return tree.root.Height()
 }
 
 // Insert 插入节点
@@ -368,7 +330,7 @@ func (tree *BST) Insert(element Element) (node Node) {
 
 	if tree.root == nil || tree.root.isZero() {
 		if tree.root == nil {
-			tree.root = NewBSTNode(element)
+			tree.root = newBSTNode(element)
 		} else {
 			tree.root.element = element
 		}

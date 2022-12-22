@@ -1,8 +1,10 @@
 package tree
 
 import (
-	"container/list"
 	"fmt"
+
+	"github.com/pyihe/gobase/data-structure/list"
+	"github.com/pyihe/gobase/data-structure/stack"
 )
 
 const (
@@ -23,6 +25,8 @@ type Element interface {
 // Node 树节点
 type Node interface {
 	String() string     // String
+	Depth() int         // 返回自己所处的深度, 深度从根节点到自己所经历的节点数量
+	Height() int        // 返回自己所处的高度, 高度为从叶子节点到自己所经历的节点数量
 	Data() Element      // 节点存储的数据
 	Root() Node         // 返回根节点
 	LeftChild() Node    // 左孩子
@@ -30,7 +34,6 @@ type Node interface {
 	LeftSibling() Node  // 左兄弟
 	RightSibling() Node // 右兄弟
 	Parent() Node       // 父节点
-	Depth() int         // 返回自己所处的深度
 	Color() Color       // 返回节点颜色
 }
 
@@ -38,7 +41,7 @@ type Node interface {
 type Tree interface {
 	// Root 返回树的根节点
 	Root() Node
-	// Depth 返回树的深度
+	// Depth 返回树的深度(高度)
 	Depth() int
 	// Insert 插入新节点
 	Insert(Element) Node
@@ -118,46 +121,13 @@ func PostOrderTraverseRecursion(root Node) (desc string) {
 
 /**********************************************************************************************************************/
 
-type treeStack struct {
-	*list.List
-}
-
-func (s *treeStack) pop() interface{} {
-	if s == nil || s.Len() <= 0 {
-		return nil
-	}
-	value := s.Back()
-	s.Remove(value)
-	return value.Value
-}
-
-// 进栈
-func (s *treeStack) push(d interface{}) {
-	if s == nil {
-		return
-	}
-	s.PushBack(d)
-}
-
-// 获取栈顶元素
-func (s *treeStack) top() interface{} {
-	if s == nil {
-		return nil
-	}
-	return s.Back().Value
-}
-
-/**********************************************************************************************************************/
-
 // PreOrderTraverse 前序遍历:以当前节点为根节点，根——>左——>右
 func PreOrderTraverse(root Node) (desc string) {
-	s := &treeStack{
-		List: list.New(),
-	}
+	s := stack.NewLinkStack()
 	p := root
 	for p != nil || s.Len() > 0 {
 		if p != nil {
-			s.push(p)
+			s.Push(p)
 			if desc == "" {
 				desc = fmt.Sprintf("%v", p)
 			} else {
@@ -165,7 +135,8 @@ func PreOrderTraverse(root Node) (desc string) {
 			}
 			p = p.LeftChild()
 		} else {
-			p = s.pop().(Node).RightChild()
+			v, _ := s.Pop()
+			p = v.(Node).RightChild()
 		}
 	}
 	return
@@ -173,16 +144,16 @@ func PreOrderTraverse(root Node) (desc string) {
 
 // InOrderTraverse 中序遍历:以当前节点为根节点，左——>根——>右
 func InOrderTraverse(root Node) (desc string) {
-	s := &treeStack{List: list.New()}
+	s := list.NewDoubleLink()
 	p := root
 	for p != nil || s.Len() > 0 {
 		if p != nil {
-			s.PushBack(p)
+			s.Insert(s.Len(), p, 1)
 			p = p.LeftChild()
 		} else {
-			ele := s.Back()
+			ele := s.Get(s.Len() - 1)
 			s.Remove(ele)
-			p = ele.Value.(Node)
+			p = ele.Value().(Node)
 			if desc == "" {
 				desc = fmt.Sprintf("%v", p)
 			} else {
@@ -196,7 +167,8 @@ func InOrderTraverse(root Node) (desc string) {
 
 // PostOrderTraverse  后序遍历：以当前节点为根节点，左——>右——>根
 func PostOrderTraverse(root Node) (desc string) {
-	s := &treeStack{List: list.New()}
+	// s := &treeStack{List: list.New()}
+	s := list.NewDoubleLink()
 	p := root
 
 	var (
@@ -206,13 +178,13 @@ func PostOrderTraverse(root Node) (desc string) {
 
 	for p != nil || s.Len() > 0 {
 		if p != nil {
-			s.PushBack(p)
+			s.Insert(s.Len(), p, 1)
 			p = p.LeftChild()
 		} else {
-			ele := s.Back().Value
-			topNode = ele.(Node)
+			ele := s.Get(s.Len() - 1)
+			topNode = ele.Value().(Node)
 			if topNode.RightChild() == nil || topNode.RightChild() == lastNode {
-				s.Remove(s.Back())
+				s.Remove(ele)
 				lastNode = topNode
 				if desc == "" {
 					desc = fmt.Sprintf("%v", topNode)
@@ -230,11 +202,11 @@ func PostOrderTraverse(root Node) (desc string) {
 // BFSTraverse 广度优先遍历(BFS), 即层次遍历, 从根节点开始从左向右每一层遍历。
 // 这里利用的队列，将根节点入列，当队列中元素大于0时，挨个出列，每出列一个元素，同时将该元素的左右节点依次入列，直到队列为空
 func BFSTraverse(root Node) (desc string) {
-	treeList := list.New()
-	treeList.PushBack(root)
+	treeList := list.NewDoubleLink()
+	treeList.Insert(treeList.Len(), root, 1)
 	for treeList.Len() > 0 {
-		ele := treeList.Front()
-		p, ok := ele.Value.(Node)
+		ele := treeList.Get(0)
+		p, ok := ele.Value().(Node)
 		if !ok {
 			break
 		}
@@ -246,10 +218,10 @@ func BFSTraverse(root Node) (desc string) {
 		treeList.Remove(ele)
 
 		if leftChild := p.LeftChild(); leftChild != nil {
-			treeList.PushBack(leftChild)
+			treeList.Insert(treeList.Len(), leftChild, 1)
 		}
 		if rightChild := p.RightChild(); rightChild != nil {
-			treeList.PushBack(rightChild)
+			treeList.Insert(treeList.Len(), rightChild, 1)
 		}
 	}
 	return
@@ -258,12 +230,12 @@ func BFSTraverse(root Node) (desc string) {
 // DFSTraverse 深度优先遍历(DFS), 从根节点开始向下访问每个子节点，直到最后一个节点或者没有节点可以访问了为止，
 // 然后在向上返回至最近一个仍然有子节点未被访问的节点的子节点开始访问。算法实现利用栈的特性，先根节点入栈，然后出栈(遍历)，然后依次入栈右子树和左子树，继续出栈。
 func DFSTraverse(root Node) (desc string) {
-	s := &treeStack{List: list.New()}
-	s.PushBack(root)
+	s := list.NewDoubleLink()
+	s.Insert(s.Len(), root, 1)
 
 	for s.Len() > 0 {
-		ele := s.Back()
-		p, ok := ele.Value.(Node)
+		ele := s.Get(s.Len() - 1)
+		p, ok := ele.Value().(Node)
 		if !ok {
 			break
 		}
@@ -276,10 +248,10 @@ func DFSTraverse(root Node) (desc string) {
 		s.Remove(ele)
 
 		if rightChild := p.RightChild(); rightChild != nil {
-			s.PushBack(rightChild)
+			s.Insert(s.Len(), rightChild, 1)
 		}
 		if leftChild := p.LeftChild(); leftChild != nil {
-			s.PushBack(leftChild)
+			s.Insert(s.Len(), leftChild, 1)
 		}
 	}
 	return
