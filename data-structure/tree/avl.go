@@ -119,20 +119,20 @@ func (node *avlNode) Color() Color { // 返回节点颜色
 	return NoColor
 }
 
-func (node *avlNode) insert1(element Element) *avlNode {
+func (node *avlNode) insert(element Element) *avlNode {
 	cmp := node.element.Compare(element)
 	switch {
 	case cmp > 0:
 		if node.leftChild == nil {
 			node.leftChild = newAVLNode(element)
 		} else {
-			node.leftChild = node.leftChild.insert1(element)
+			node.leftChild = node.leftChild.insert(element)
 		}
 	case cmp < 0:
 		if node.rightChild == nil {
 			node.rightChild = newAVLNode(element)
 		} else {
-			node.rightChild = node.rightChild.insert1(element)
+			node.rightChild = node.rightChild.insert(element)
 		}
 	case cmp == 0:
 		return node
@@ -274,7 +274,7 @@ func (avl *AVL) Insert(element Element) {
 			avl.root.height = 1
 		}
 	} else {
-		avl.root = avl.root.insert1(element)
+		avl.root = avl.root.insert(element)
 	}
 }
 
