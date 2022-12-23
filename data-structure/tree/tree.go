@@ -151,8 +151,7 @@ func InOrderTraverse(root Node) (desc string) {
 			s.Insert(s.Len(), p, 1)
 			p = p.LeftChild()
 		} else {
-			ele := s.Get(s.Len() - 1)
-			s.Remove(ele)
+			ele := s.RemoveByLocate(s.Len() - 1)
 			p = ele.Value().(Node)
 			if desc == "" {
 				desc = fmt.Sprintf("%v", p)
@@ -167,7 +166,6 @@ func InOrderTraverse(root Node) (desc string) {
 
 // PostOrderTraverse  后序遍历：以当前节点为根节点，左——>右——>根
 func PostOrderTraverse(root Node) (desc string) {
-	// s := &treeStack{List: list.New()}
 	s := list.NewDoubleLink()
 	p := root
 
@@ -205,7 +203,7 @@ func BFSTraverse(root Node) (desc string) {
 	treeList := list.NewDoubleLink()
 	treeList.Insert(treeList.Len(), root, 1)
 	for treeList.Len() > 0 {
-		ele := treeList.Get(0)
+		ele := treeList.RemoveByLocate(treeList.Len() - 1)
 		p, ok := ele.Value().(Node)
 		if !ok {
 			break
@@ -215,7 +213,6 @@ func BFSTraverse(root Node) (desc string) {
 		} else {
 			desc = fmt.Sprintf("%s->%v", desc, p)
 		}
-		treeList.Remove(ele)
 
 		if leftChild := p.LeftChild(); leftChild != nil {
 			treeList.Insert(treeList.Len(), leftChild, 1)
@@ -234,7 +231,7 @@ func DFSTraverse(root Node) (desc string) {
 	s.Insert(s.Len(), root, 1)
 
 	for s.Len() > 0 {
-		ele := s.Get(s.Len() - 1)
+		ele := s.RemoveByLocate(s.Len() - 1)
 		p, ok := ele.Value().(Node)
 		if !ok {
 			break
@@ -244,9 +241,6 @@ func DFSTraverse(root Node) (desc string) {
 		} else {
 			desc = fmt.Sprintf("%s->%v", desc, p)
 		}
-
-		s.Remove(ele)
-
 		if rightChild := p.RightChild(); rightChild != nil {
 			s.Insert(s.Len(), rightChild, 1)
 		}
