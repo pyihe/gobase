@@ -119,82 +119,71 @@ func (node *avlNode) Color() Color { // 返回节点颜色
 	return NoColor
 }
 
-func (node *avlNode) insert(element Element) (*avlNode, bool) {
-	var (
-		created    = false
-		cmp        = 0
-		p          = node
-		rookieNode = newAVLNode(element)
-	)
+func (node *avlNode) insert1(element Element) *avlNode {
+	cmp := node.element.Compare(element)
+	switch {
+	case cmp > 0:
+		if node.leftChild == nil {
+			node.leftChild = newAVLNode(element)
+		} else {
+			node.leftChild = node.leftChild.insert1(element)
+		}
+	case cmp < 0:
+		if node.rightChild == nil {
+			node.rightChild = newAVLNode(element)
+		} else {
+			node.rightChild = node.rightChild.insert1(element)
+		}
+	case cmp == 0:
+		return node
+	}
 
-loop:
-	for p != nil {
-		cmp = p.element.Compare(element)
-		// 每往下走一层，新节点的高度+1
-		rookieNode.height += 1
-		switch {
-		case cmp > 0:
-			if p.leftChild == nil {
-				rookieNode.parent = p
-				p.leftChild = rookieNode
-				created = true
-				break loop
-			}
-			p = p.leftChild
-		case cmp < 0:
-			if p.rightChild == nil {
-				rookieNode.parent = p
-				p.rightChild = rookieNode
-				created = true
-				break loop
-			}
-			p = p.rightChild
-		case cmp == 0:
-			rookieNode = p
-			break loop
-		}
+	node.height = pkg.MaxInt(getHeight(node.leftChild), getHeight(node.rightChild)) + 1
+
+	newRoot, balanced := balance(node)
+	if balanced {
+		return newRoot
+	} else {
+		return node
 	}
-	// 如果没有创造新节点，则直接返回，计算高度
-	if !created {
-		goto end
-	}
-	// 创造了新节点, 需要重新计算插入路径上的每个节点的高度
-	if rookieNode.parent != nil {
-		// 父节点左右孩子都不为空，证明插入的叶子节点没有影响父节点高度，不需要计算高度，也不需要重新平衡
-		if rookieNode.parent.leftChild != nil && rookieNode.parent.rightChild != nil {
-			created = false
-			goto end
-		}
-		// 如果新节点的父节点只有一个孩子节点，则父节点的高度受影响，需要更新整个插入路径上每个节点的高度
-		p = rookieNode.parent
-		for p != nil {
-			p.height = pkg.MaxInt(getHeight(p.leftChild), getHeight(p.rightChild))
-			p = p.parent
-		}
-	}
-end:
-	return rookieNode, created
 }
 
 // 平衡以root为根节点的子树, 并返回平衡后该子树新的根节点
-func balance(root *avlNode) (*avlNode, bool) {
+func balance(root *avlNode) (newRoot *avlNode, balanced bool) {
 	const bFactor = 2
 
 	diff := getHeight(root.leftChild) - getHeight(root.rightChild)
 	// 如果高度差小于平衡因子，则不需要平衡，直接返回原节点
 	if pkg.AbsInt(diff) < bFactor {
-		return root, false
+		newRoot, balanced = root, false
+		return
 	}
 
-	// 需要平衡
-
-	return nil, true
+	switch {
+	case diff > 0: // 左子树比右子树高
+		leftTree := root.leftChild
+		if getHeight(leftTree.leftChild) > getHeight(leftTree.rightChild) {
+			newRoot, balanced = rightRotate(root), true
+		} else {
+			newRoot, balanced = leftRightRotate(root), true
+		}
+	case diff < 0: // 右子树比左子树高
+		rightTree := root.rightChild
+		if getHeight(rightTree.rightChild) > getHeight(rightTree.leftChild) {
+			newRoot, balanced = leftRotate(root), true
+		} else {
+			newRoot, balanced = rightLeftRotate(root), true
+		}
+	}
+	return
 }
 
 // LL类型旋转：右单旋转
 // 1. root的左孩子上升为父节点
 // 2. root下降为其左孩子的右孩子
 // 3. root的左孙子成为其左兄弟，root的右孙子变为其左孩子
+// 触发场景: (假设不平衡子树的根结点为root, 新插入的节点为N)
+// N为root的左孩子的左孩子
 func rightRotate(root *avlNode) *avlNode {
 	left := root.leftChild
 	root.leftChild = left.rightChild
@@ -210,6 +199,8 @@ func rightRotate(root *avlNode) *avlNode {
 // 1. root的右孩子上升为父节点
 // 2. root下降为其右孩子的左孩子
 // 3. root的右孙子成为其右兄弟，左孙子成为其右孩子
+// 触发场景: (假设不平衡子树的根结点为root, 新插入的节点为N)
+// N为root的右孩子的右孩子
 func leftRotate(root *avlNode) *avlNode {
 	right := root.rightChild
 	root.rightChild = right.leftChild
@@ -222,12 +213,37 @@ func leftRotate(root *avlNode) *avlNode {
 	right.height = pkg.MaxInt(getHeight(right.leftChild), getHeight(right.rightChild)) + 1
 	return right
 }
+
+// LR类型旋转: 先左旋转然后右旋转
+// 1. 先对root的左孩子进行左旋转
+// 2. 然后对root进行右旋转
+// 触发场景: (假设不平衡子树的根结点为root, 新插入的节点为N)
+// N为root左孩子的右孩子
+func leftRightRotate(root *avlNode) *avlNode {
+	root.leftChild = leftRotate(root.leftChild)
+	return rightRotate(root)
+}
+
+// RL类型旋转: 先右旋转然后左旋转
+// 1. 先对root的有孩子进行右旋转
+// 2. 然后对root进行左旋转
+// 触发场景: (假设不平衡子树的根结点为root, 新插入的节点为N)
+// N为root的右孩子的左孩子
+func rightLeftRotate(root *avlNode) *avlNode {
+	root.rightChild = rightRotate(root.rightChild)
+	return leftRotate(root)
+}
 func getHeight(node Node) int {
 	return node.Height()
 }
 
+// AVL 二叉平衡树
 type AVL struct {
 	root *avlNode
+}
+
+func NewAVL() *AVL {
+	return &AVL{}
 }
 
 func (avl *AVL) Root() Node {
@@ -244,18 +260,10 @@ func (avl *AVL) Depth() int {
 	return avl.root.Height()
 }
 
-func (avl *AVL) Insert(element Element) Node {
+func (avl *AVL) Insert(element Element) {
 	if avl == nil || element == nil {
-		return nil
+		return
 	}
-
-	var (
-		balanced    bool
-		needBalance bool
-		rookieNode  *avlNode
-		grandFather *avlNode
-		newRoot     *avlNode
-	)
 
 	// 插入的是第一个节点
 	if avl.root == nil || avl.root.isZero() {
@@ -265,38 +273,9 @@ func (avl *AVL) Insert(element Element) Node {
 			avl.root.element = element
 			avl.root.height = 1
 		}
-		rookieNode = avl.root
 	} else {
-		rookieNode, needBalance = avl.root.insert(element)
+		avl.root = avl.root.insert1(element)
 	}
-
-	if !needBalance || rookieNode.parent == nil {
-		goto end
-	}
-
-	// 因为AVL的平衡因子为2，所以对于新插入的节点
-	// 发生不平衡的节点必然只能是其爷爷节点
-	// 所以只需要平衡爷爷节点即可
-	grandFather = rookieNode.parent.parent
-	if grandFather == nil {
-		goto end
-	}
-	newRoot, balanced = balance(grandFather)
-	if !balanced {
-		goto end
-	}
-	if grandFather.parent == nil { // 如果爷爷节点是根节点，则需要更新AVL树的根节点为平衡后返回的根节点
-		avl.root = newRoot
-	} else {
-		// 否则只需要根新爷爷节点的父节点与孩子节点的关系即可
-		if grandFather.parent.leftChild == grandFather {
-			grandFather.parent.leftChild = newRoot
-		} else {
-			grandFather.parent.rightChild = newRoot
-		}
-	}
-end:
-	return rookieNode
 }
 
 func (avl *AVL) Remove(element Element) bool {
