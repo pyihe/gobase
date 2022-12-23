@@ -177,20 +177,19 @@ func (l *CircleLink) Remove(v *Element) {
 
 func (l *CircleLink) Reverse() {
 	var (
-		j    = 0
 		p    = l.head
-		pre  *singleNode
+		pre  = l.rear
 		next *singleNode
 	)
-	for p != nil && j < l.length {
-		if p.next == l.head {
-			l.rear = l.head
-			l.head = p
-		}
+	for p != nil {
 		next = p.next
 		p.next = pre
 		pre = p
 		p = next
+		if next == l.head {
+			l.head, l.rear = l.rear, l.head
+			break
+		}
 	}
 }
 
@@ -203,21 +202,4 @@ func (l *CircleLink) Range(fn func(i int, e *Element) bool) {
 		j += 1
 		p = p.next
 	}
-}
-
-// Merge 合并循环链表
-func (l *CircleLink) Merge(list *CircleLink) {
-	if list == nil {
-		return
-	}
-
-	if l.length == 0 {
-		l.head = list.head
-		l.rear = list.rear
-		return
-	}
-
-	l.rear.next = list.head
-	list.rear.next = l.head
-	l.rear = list.rear
 }

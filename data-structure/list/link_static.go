@@ -98,13 +98,19 @@ func (l *StaticLink) getNextSpare() (i int) {
 
 func (l *StaticLink) shrink() {
 	c := cap(l.nodes)
-	n := l.length
+	n := len(l.nodes)
 	if n >= (c/2) || c < 2*l.initSize {
 		return
 	}
-	// 达到收缩条件
-	// 申请新空间
-	nList := make([]*staticNode, l.initSize, l.initSize)
+	// 达到收缩条件, 申请新空间
+	// 达到缩容标准且元素数量超过初始容量，则容量减半
+	if n >= l.initSize {
+		c /= 2
+	} else { // 否则回归到初始容量
+		c = l.initSize
+	}
+	fmt.Println("xxx", c)
+	nList := make([]*staticNode, c, c)
 
 	// 将数据节点全部转移至新空间
 	p := l.nodes[len(l.nodes)-1].next
@@ -189,8 +195,11 @@ func (l *StaticLink) Get(i int) (e *Element) {
 }
 
 func (l *StaticLink) Insert(i int, v interface{}, op int) *Element {
-	if i < 0 || i > l.length {
-		return nil
+	if i < 0 {
+		i = 0
+	}
+	if i >= l.length {
+		i = l.length - 1
 	}
 
 	if op <= 0 {
@@ -239,18 +248,16 @@ func (l *StaticLink) RemoveByLocate(i int) (e *Element) {
 
 	// 要删除节点i，则需要找到i的前驱节点
 	i = i - 1
-	target := -1
-	k := len(l.nodes) - 1
+	target, k := -1, len(l.nodes)-1
 	for j := 0; j <= i; j++ {
 		k = l.nodes[k].next
 	}
 
 	target = l.nodes[k].next
-	l.nodes[k].next = l.nodes[target].next
-	l.free(target)
-	l.length -= 1
 	e = l.nodes[target].element
-	l.nodes[target].element = nil
+	l.nodes[k].next = l.nodes[target].next
+	l.length -= 1
+	l.free(target)
 	l.shrink()
 	return
 }

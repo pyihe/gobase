@@ -69,10 +69,7 @@ func (l *DoubleLink) Insert(i int, v interface{}, op int) *Element {
 	}
 
 	j, p := 0, l.head
-	for p != nil {
-		if j == i {
-			break
-		}
+	for p != nil && j < i {
 		p = p.next
 		j += 1
 	}
@@ -85,6 +82,9 @@ func (l *DoubleLink) Insert(i int, v interface{}, op int) *Element {
 	// 插入第一个节点
 	if p == nil {
 		l.length += 1
+		// 只有一个节点时，前后指针都指向自己
+		ele.next = ele
+		ele.pre = ele
 		l.head = ele
 		return ele.element
 	}
@@ -101,17 +101,14 @@ func (l *DoubleLink) Insert(i int, v interface{}, op int) *Element {
 		next = p
 	}
 
+	l.length += 1
 	ele.pre = pre
 	ele.next = next
-	if pre != nil {
-		pre.next = ele
-	} else {
+	pre.next = ele
+	next.pre = ele
+	if next == l.head && op <= 0 {
 		l.head = ele
 	}
-	if next != nil {
-		next.pre = ele
-	}
-	l.length += 1
 	return ele.element
 }
 
@@ -137,38 +134,35 @@ func (l *DoubleLink) RemoveByLocate(i int) (e *Element) {
 			p = p.next
 		}
 	}
+	e = p.element
 	pre := p.pre
 	next := p.next
-	if pre != nil {
-		pre.next = next
-	} else {
+	l.length -= 1
+	pre.next = next
+	next.pre = pre
+	if next == l.head.next {
 		l.head = next
 	}
-	if next != nil {
-		next.pre = pre
-	}
-	l.length -= 1
 	return p.element
 }
 
 func (l *DoubleLink) Remove(v *Element) {
-	p := l.head
-	for p != nil {
+	j, p := 0, l.head
+	for p != nil && j < l.length {
 		if p.element != v {
 			p = p.next
+			j += 1
 			continue
 		}
+		l.length -= 1
 		pre := p.pre
 		next := p.next
-		if pre != nil {
-			pre.next = next
-		} else {
+		pre.next = next
+		next.pre = pre
+		// 被删除的是头节点
+		if next == l.head.next {
 			l.head = next
 		}
-		if next != nil {
-			next.pre = pre
-		}
-		l.length -= 1
 		break
 	}
 	return

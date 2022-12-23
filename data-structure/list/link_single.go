@@ -64,8 +64,11 @@ func (l *SingleLink) Get(i int) (e *Element) {
 }
 
 func (l *SingleLink) Insert(i int, v interface{}, op int) *Element {
-	if i < 0 || i > l.length {
-		return nil
+	if i < 0 {
+		i = 0
+	}
+	if i >= l.length {
+		i = l.length - 1
 	}
 
 	// 根据插入位置和插入方向获取新节点的前驱节点所处的位置
