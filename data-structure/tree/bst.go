@@ -290,7 +290,7 @@ loop:
 
 /**********************************************************************************************************************/
 
-// BST 二叉搜索平衡树
+// BST 二叉搜索树(非平衡)
 type BST struct {
 	root *bstNode // 根节点
 }
@@ -319,9 +319,9 @@ func (tree *BST) Depth() int {
 }
 
 // Insert 插入节点
-func (tree *BST) Insert(element Element) (node Node) {
+func (tree *BST) Insert(element Element) {
 	if tree == nil || element == nil {
-		return nil
+		return
 	}
 
 	if tree.root == nil || tree.root.isZero() {
@@ -331,11 +331,9 @@ func (tree *BST) Insert(element Element) (node Node) {
 			tree.root.element = element
 		}
 		tree.root.depth = 1
-		node = tree.root
 	} else {
-		node = tree.root.insert(element)
+		tree.root.insert(element)
 	}
-	return
 }
 
 // Remove 移除与element相等的节点

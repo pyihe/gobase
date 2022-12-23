@@ -44,7 +44,7 @@ type Tree interface {
 	// Depth 返回树的深度(高度)
 	Depth() int
 	// Insert 插入新节点
-	Insert(Element) Node
+	Insert(Element)
 	// Remove 移除节点
 	Remove(Element) bool
 	// Find 查找节点
