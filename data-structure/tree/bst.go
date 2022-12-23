@@ -47,6 +47,29 @@ func (node *bstNode) String() string {
 	return fmt.Sprintf("%v", node.element.Value())
 }
 
+func (node *bstNode) Depth() int {
+	if node == nil {
+		return 0
+	}
+	return node.depth
+}
+
+func (node *bstNode) Height() int {
+	if node == nil {
+		return 0
+	}
+	switch {
+	case node.leftChild == nil && node.rightChild == nil:
+		return 1
+	case node.leftChild != nil && node.rightChild == nil:
+		return 1 + node.leftChild.Height()
+	case node.leftChild == nil && node.rightChild != nil:
+		return 1 + node.rightChild.Height()
+	default:
+		return 1 + pkg.MaxInt(node.leftChild.Height(), node.rightChild.Height())
+	}
+}
+
 func (node *bstNode) Data() Element {
 	if node == nil {
 		return nil
@@ -59,10 +82,6 @@ func (node *bstNode) Data() Element {
 
 // Root 返回自己所在树的根节点
 func (node *bstNode) Root() Node {
-	if node == nil {
-		return nil
-	}
-
 	p := node
 	for p.parent != nil {
 		p = p.parent
@@ -86,6 +105,18 @@ func (node *bstNode) RightChild() Node {
 	return node.rightChild
 }
 
+// LeftSibling 只有当自己不是左兄弟节点且左兄弟节点非空时才返回非nil
+func (node *bstNode) LeftSibling() Node {
+	if node == nil {
+		return nil
+	}
+	parent := node.parent
+	if parent == nil || parent.leftChild == nil || node == parent.leftChild {
+		return nil
+	}
+	return parent.leftChild
+}
+
 // RightSibling 只有当自己不是右兄弟节点且右兄弟节点非空时才返回非nil
 func (node *bstNode) RightSibling() Node {
 	if node == nil {
@@ -99,46 +130,11 @@ func (node *bstNode) RightSibling() Node {
 	return parent.rightChild
 }
 
-// LeftSibling 只有当自己不是左兄弟节点且左兄弟节点非空时才返回非nil
-func (node *bstNode) LeftSibling() Node {
-	if node == nil {
-		return nil
-	}
-	parent := node.parent
-	if parent == nil || parent.leftChild == nil || node == parent.leftChild {
-		return nil
-	}
-	return parent.leftChild
-}
-
 func (node *bstNode) Parent() Node {
 	if node == nil || node.parent == nil {
 		return nil
 	}
 	return node.parent
-}
-
-func (node *bstNode) Height() int {
-	if node == nil {
-		return 0
-	}
-	switch {
-	case node.leftChild == nil && node.rightChild == nil:
-		return 1
-	case node.leftChild != nil && node.rightChild == nil:
-		return 1 + node.leftChild.Height()
-	case node.leftChild == nil && node.rightChild != nil:
-		return 1 + node.rightChild.Height()
-	default:
-		return 1 + pkg.MaxInt(node.leftChild.Height(), node.rightChild.Height())
-	}
-}
-
-func (node *bstNode) Depth() int {
-	if node == nil {
-		return 0
-	}
-	return node.depth
 }
 
 func (node *bstNode) Color() Color {
