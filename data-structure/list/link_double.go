@@ -142,6 +142,9 @@ func (l *DoubleLink) RemoveByLocate(i int) (e *Element) {
 	next.pre = pre
 	if next == l.head.next {
 		l.head = next
+		if l.length == 0 {
+			l.head = nil
+		}
 	}
 	return p.element
 }
@@ -162,6 +165,9 @@ func (l *DoubleLink) Remove(v *Element) {
 		// 被删除的是头节点
 		if next == l.head.next {
 			l.head = next
+			if l.length == 0 {
+				l.head = nil
+			}
 		}
 		break
 	}
