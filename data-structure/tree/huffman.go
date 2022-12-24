@@ -132,7 +132,6 @@ func (h *HuffmanTree) build(source map[rune]int) {
 
 func (h *HuffmanTree) Encode(char string) string {
 	builder := &strings.Builder{}
-	fmt.Println(h.codeSet)
 	for _, c := range char {
 		builder.WriteString(h.codeSet[c])
 	}
