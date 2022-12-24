@@ -55,6 +55,44 @@ type Tree interface {
 
 /**********************************************************************************************************************/
 
+func getMinNode(node interface{}) (mNode interface{}) {
+	switch node.(type) {
+	case *avlNode:
+		aNode := node.(*avlNode)
+		for aNode.leftChild != nil {
+			aNode = aNode.leftChild
+		}
+		mNode = aNode
+	case *bstNode:
+		bNode := node.(*bstNode)
+		for bNode.leftChild != nil {
+			bNode = bNode.leftChild
+		}
+		mNode = bNode
+	}
+	return
+}
+
+func getMaxNode(node interface{}) (mNode interface{}) {
+	switch node.(type) {
+	case *avlNode:
+		aNode := node.(*avlNode)
+		for aNode.rightChild != nil {
+			aNode = aNode.rightChild
+		}
+		mNode = aNode
+	case *bstNode:
+		bNode := node.(*bstNode)
+		for bNode.rightChild != nil {
+			bNode = bNode.rightChild
+		}
+		mNode = bNode
+	}
+	return
+}
+
+/**********************************************************************************************************************/
+
 // PreOrderTraverseRecursion 前序遍历(递归)
 // 遍历顺序: 以当前节点为根节点，根——>左——>右
 func PreOrderTraverseRecursion(root Node) (desc string) {

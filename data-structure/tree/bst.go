@@ -144,24 +144,6 @@ func (node *bstNode) Color() Color {
 	return NoColor
 }
 
-// maxNode 获取node的最大子孙节点，包括自己
-func (node *bstNode) maxNode() *bstNode {
-	p := node
-	for p.rightChild != nil {
-		p = p.rightChild
-	}
-	return p
-}
-
-// minNode 获取node的最小子孙节点，包括自己
-func (node *bstNode) minNode() *bstNode {
-	p := node
-	for p.leftChild != nil {
-		p = p.leftChild
-	}
-	return p
-}
-
 func (node *bstNode) insert(element Element) *bstNode {
 	var (
 		cmp        = 0
@@ -221,12 +203,12 @@ loop:
 	// N为0时节点需要删除
 	switch {
 	case p.rightChild != nil: // 被删除节点存在右子树，则将右子树的最小节点位置提升到p处，然后从右子树中删除该最小节点
-		mNode := p.rightChild.minNode()
+		mNode := getMinNode(p.rightChild).(*bstNode)
 		p.element = mNode.element
 		p.rightChild.remove(mNode.element)
 
 	case p.leftChild != nil: // 被删除节点只存在左子树，则将左子树中的最大节点提升至p处，然后从左子树中删除该最大节点
-		mNode := p.leftChild.maxNode()
+		mNode := getMaxNode(p.leftChild).(*bstNode)
 		p.element = mNode.element
 		p.leftChild.remove(mNode.element)
 
@@ -338,7 +320,7 @@ func (tree *BST) Insert(element Element) {
 
 // Remove 移除与element相等的节点
 func (tree *BST) Remove(element Element) bool {
-	if tree == nil || tree.root == nil {
+	if tree == nil || tree.root == nil || element == nil {
 		return false
 	}
 	return tree.root.remove(element)
