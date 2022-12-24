@@ -49,7 +49,9 @@ type Tree interface {
 
 ### 实现列表(Implement List)
 
-| 名称(Name)      | 代码(Code)                                                                           |
-|---------------|------------------------------------------------------------------------------------|
-| 树遍历(Traverse) | [tree.go](https://github.com/pyihe/gobase/blob/master/data-structure/tree/tree.go) |
-| 二叉搜索树(BST)    | [bst.go](https://github.com/pyihe/gobase/blob/master/data-structure/tree/bst.go)   |
+| 名称(Name)      | 代码(Code)                                                                                 |
+|---------------|------------------------------------------------------------------------------------------|
+| 树遍历(Traverse) | [tree.go](https://github.com/pyihe/gobase/blob/master/data-structure/tree/tree.go)       |
+| 二叉搜索树(BST)    | [bst.go](https://github.com/pyihe/gobase/blob/master/data-structure/tree/bst.go)         |
+| 二叉平衡树(AVL)    | [avl.go](https://github.com/pyihe/gobase/blob/master/data-structure/tree/avl.go)         |
+| 霍夫曼树(Huffman) | [huffman.go](https://github.com/pyihe/gobase/blob/master/data-structure/tree/huffman.go) |
