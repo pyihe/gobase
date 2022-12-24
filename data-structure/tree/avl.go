@@ -148,6 +148,90 @@ func (node *avlNode) insert(element Element) *avlNode {
 	}
 }
 
+func (node *avlNode) remove(element Element) (root *avlNode, ok bool) {
+	cmp := node.element.Compare(element)
+	switch {
+	case cmp > 0:
+		if node.leftChild != nil {
+			// 递归在左子树删除元素
+			root, ok = node.leftChild.remove(element)
+			if ok {
+				node.leftChild = root
+				root = node.leftChild
+			}
+		}
+	case cmp < 0:
+		if node.rightChild != nil {
+			// 递归在右子树删除元素
+			root, ok = node.rightChild.remove(element)
+			if ok {
+				node.rightChild = root
+				root = node.rightChild
+			}
+		}
+	case cmp == 0:
+		switch {
+		case node.rightChild != nil:
+			mNode := getMinNode(node.rightChild).(*avlNode)
+			node.element = mNode.element
+			node.rightChild, ok = node.rightChild.remove(mNode.element)
+		case node.leftChild != nil:
+			mNode := getMaxNode(node.leftChild).(*avlNode)
+			node.element = mNode.element
+			node.leftChild, ok = node.leftChild.remove(mNode.element)
+		default:
+			return nil, true
+		}
+	}
+
+	if !ok {
+		return
+	}
+
+	node.height = pkg.MaxInt(getHeight(node.leftChild), getHeight(node.rightChild)) + 1
+	newRoot, balanced := balance(node)
+	if balanced {
+		return newRoot, true
+	} else {
+		return node, true
+	}
+}
+
+func (node *avlNode) find(element Element) *avlNode {
+	cmp := node.element.Compare(element)
+	switch {
+	case cmp > 0:
+		if node.leftChild != nil {
+			return node.leftChild.find(element)
+		}
+	case cmp < 0:
+		if node.rightChild != nil {
+			return node.rightChild.find(element)
+		}
+	case cmp == 0:
+		return node
+	}
+	return nil
+}
+
+func (node *avlNode) update(old, element Element) (*avlNode, bool) {
+	oNode := node.find(old)
+	if oNode == nil {
+		return nil, false
+	}
+	eNode := node.find(element)
+	if eNode != nil {
+		return node.remove(old)
+	}
+
+	newRoot, ok := node.remove(old)
+	if !ok {
+		return nil, false
+	}
+	newRoot = newRoot.insert(element)
+	return newRoot, true
+}
+
 // 平衡以root为根节点的子树, 并返回平衡后该子树新的根节点
 func balance(root *avlNode) (newRoot *avlNode, balanced bool) {
 	const bFactor = 2
@@ -279,13 +363,35 @@ func (avl *AVL) Insert(element Element) {
 }
 
 func (avl *AVL) Remove(element Element) bool {
-	return false
+	if avl == nil || element == nil || avl.root == nil {
+		return false
+	}
+	newRoot, ok := avl.root.remove(element)
+	if ok {
+		avl.root = newRoot
+	}
+	return ok
 }
 
-func (avl *AVL) Update(old, new Element) bool {
-	return false
+func (avl *AVL) Update(old, newElement Element) bool {
+	if avl == nil || avl.root == nil {
+		return false
+	}
+	if old == nil || newElement == nil {
+		return false
+	}
+
+	newRoot, ok := avl.root.update(old, newElement)
+	if !ok {
+		return false
+	}
+	avl.root = newRoot
+	return true
 }
 
 func (avl *AVL) Find(element Element) Node {
-	return nil
+	if avl == nil || avl.root == nil || element == nil {
+		return nil
+	}
+	return avl.root.find(element)
 }
