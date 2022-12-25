@@ -55,3 +55,4 @@ type Tree interface {
 | 二叉搜索树(BST)    | [bst.go](https://github.com/pyihe/gobase/blob/master/data-structure/tree/bst.go)         |
 | 二叉平衡树(AVL)    | [avl.go](https://github.com/pyihe/gobase/blob/master/data-structure/tree/avl.go)         |
 | 霍夫曼树(Huffman) | [huffman.go](https://github.com/pyihe/gobase/blob/master/data-structure/tree/huffman.go) |
+| 前缀树(Trie)     | [trie.go](https://github.com/pyihe/gobase/blob/master/data-structure/tree/trie.go)       |
