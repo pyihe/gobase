@@ -64,11 +64,17 @@ func getMinNode(node interface{}) (mNode interface{}) {
 		}
 		mNode = aNode
 	case *bstNode:
-		bNode := node.(*bstNode)
-		for bNode.leftChild != nil {
-			bNode = bNode.leftChild
+		realNode := node.(*bstNode)
+		for realNode.leftChild != nil {
+			realNode = realNode.leftChild
 		}
-		mNode = bNode
+		mNode = realNode
+	case *bNode:
+		realNode := node.(*bNode)
+		for len(realNode.children) > 0 {
+			realNode = realNode.children[0]
+		}
+		mNode = realNode
 	}
 	return
 }
@@ -82,11 +88,18 @@ func getMaxNode(node interface{}) (mNode interface{}) {
 		}
 		mNode = aNode
 	case *bstNode:
-		bNode := node.(*bstNode)
-		for bNode.rightChild != nil {
-			bNode = bNode.rightChild
+		realNode := node.(*bstNode)
+		for realNode.rightChild != nil {
+			realNode = realNode.rightChild
 		}
-		mNode = bNode
+		mNode = realNode
+
+	case *bNode:
+		realNode := node.(*bNode)
+		for len(realNode.children) > 0 {
+			realNode = realNode.children[len(realNode.children)-1]
+		}
+		mNode = realNode
 	}
 	return
 }

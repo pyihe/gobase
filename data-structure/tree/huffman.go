@@ -6,17 +6,17 @@ import (
 	"strings"
 )
 
-type nodeList []*huffmanNode
+type huffmanNodeList []*huffmanNode
 
-func (w nodeList) Len() int {
+func (w huffmanNodeList) Len() int {
 	return len(w)
 }
 
-func (w nodeList) Swap(i, j int) {
+func (w huffmanNodeList) Swap(i, j int) {
 	w[i], w[j] = w[j], w[i]
 }
 
-func (w nodeList) Less(i, j int) bool {
+func (w huffmanNodeList) Less(i, j int) bool {
 	switch {
 	case w[i].weight < w[j].weight:
 		return true
@@ -86,12 +86,12 @@ func (h *HuffmanTree) String() (desc string) {
 
 func (h *HuffmanTree) build(source map[rune]int) {
 	// 1. 根据原集合生成所有的叶子节点
-	leafSet := make(nodeList, 0, len(source))
+	leafSet := make(huffmanNodeList, 0, len(source))
 	for data, weight := range source {
 		leafSet = append(leafSet, newHuffmanNode(data, weight))
 	}
 
-	regroup := func(list nodeList, extra *huffmanNode) nodeList {
+	regroup := func(list huffmanNodeList, extra *huffmanNode) huffmanNodeList {
 		if extra != nil {
 			list = append(list, extra)
 		}
