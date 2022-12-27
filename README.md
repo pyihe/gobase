@@ -21,3 +21,4 @@ data-structure, algorithm, design-pattern written in Go.
 3. [抽象工厂模式(Abstract Factory Pattern)](https://github.com/pyihe/gobase/tree/master/design-pattern/factory_abstract)
 4. [原型模式(Prototype Pattern)](https://github.com/pyihe/gobase/tree/master/design-pattern/prototype)
 5. [单例模式(Singleton Pattern)](https://github.com/pyihe/gobase/tree/master/design-pattern/singleton)
+6. |[适配器模式(Adapter Pattern)](https://github.com/pyihe/gobase/tree/master/design-pattern/adapter)|
