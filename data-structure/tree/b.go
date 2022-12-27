@@ -38,6 +38,13 @@ type bTreeData struct {
 	value interface{}
 }
 
+func (bt *bTreeData) String() (desc string) {
+	if bt == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("(%v, %v)", bt.key, bt.value)
+}
+
 func newBTreeData(key int, value interface{}) *bTreeData {
 	return &bTreeData{
 		key:   key,
