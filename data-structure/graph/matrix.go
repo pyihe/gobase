@@ -23,7 +23,7 @@ type MatrixGraph struct {
 func NewMatrixGraph() (*MatrixGraph, error) {
 	m := &MatrixGraph{}
 	fmt.Printf("输入顶点数和边数: \n")
-	_, err := fmt.Scanf("%d, %d", &m.vertexNum, &m.edgeNum)
+	_, err := fmt.Scanf("%d %d", &m.vertexNum, &m.edgeNum)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func NewMatrixGraph() (*MatrixGraph, error) {
 	for k := 0; k < m.edgeNum; k++ {
 		i, j, w := 0, 0, 0
 		fmt.Printf("输入边(Vi, Vj)上的下标i, 下标j和权重w:\n")
-		_, err = fmt.Scanf("%d, %d, %d", &i, &j, &w)
+		_, err = fmt.Scanf("%d %d %d", &i, &j, &w)
 		if err != nil {
 			return nil, err
 		}
@@ -70,7 +70,10 @@ func (m *MatrixGraph) GetDegree(i int) int {
 		return 0
 	}
 	degree, l := 0, m.arc[i]
-	for _, d := range l {
+	for j, d := range l {
+		if j == m.vertexNum {
+			break
+		}
 		if d != Infinity {
 			degree += 1
 		}

@@ -11,6 +11,6 @@ type (
 )
 
 const (
-	MaxVex   = 100           // 最大顶点数
-	Infinity = math.MaxInt32 // 边的权值的最大值
+	MaxVex   = 100         // 最大顶点数
+	Infinity = math.MaxInt // 边的权值的最大值
 )
