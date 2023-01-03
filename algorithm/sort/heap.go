@@ -18,35 +18,32 @@ func Heap(data []int) {
 		return
 	}
 	// 构建最大堆
-	maxHeap(data, count)
-
-	for i := count - 1; i >= 0; i-- {
-		data[0], data[i] = data[i], data[0]
-		count--
-		heap(data, 0, count)
+	// maxHeap(data, count)
+	for i := 0; i < count; i++ {
+		buildHeap(data[i:])
 	}
 }
 
-// 创建最大堆
-func maxHeap(data []int, len int) {
-	for i := len / 2; i >= 0; i-- {
-		heap(data, i, len)
+func buildHeap(src []int) {
+	// 表示n叉堆的数组中，叶子节点位于len(src)/4往后的元素中
+	// 从第一个非叶子节点开始，比较节点和自己孩子的大小
+	// 最大堆选出最大的值作为父节点，最小堆选择最小的值作为父节点
+	n := len(src)
+	for i := n/2 - 1; i >= 0; i-- {
+		heapify(src, i)
 	}
 }
 
-func heap(data []int, index, len int) {
-	left := 2*index + 1
-	right := 2*index + 2
-	largest := index
-
-	if left < len && data[left] > data[largest] {
-		largest = left
+func heapify(src []int, rootIndex int) {
+	leftIndex, rightIndex, largestIndex := 2*rootIndex+1, 2*rootIndex+2, rootIndex
+	if leftIndex < len(src) && src[leftIndex] > src[rootIndex] {
+		largestIndex = leftIndex
 	}
-	if right < len && data[right] > data[largest] {
-		largest = right
+	if rightIndex < len(src) && src[rightIndex] > src[rootIndex] {
+		largestIndex = rightIndex
 	}
-	if largest != index {
-		data[largest], data[index] = data[index], data[largest]
-		heap(data, largest, len)
+	if largestIndex != rootIndex {
+		src[rootIndex], src[largestIndex] = src[largestIndex], src[rootIndex]
+		heapify(src, rootIndex)
 	}
 }
