@@ -9,73 +9,23 @@ package sort
 	基准值的选择对排序性能有决定性影响。
 */
 
-// 获取基准位置
-func getPivot(src []int, start, end int) int {
-	if len(src) <= end || start < 0 {
-		panic("invalid start or end value.")
+func Quick(array []int, p, r int) {
+	if p < r {
+		q := partition(array, 0, len(array)-1)
+		Quick(array, p, q-1)
+		Quick(array, q+1, r)
 	}
-	index := start - 1 // 用于存放最后返回的pivot
-	pivot := end       // 选取最后一个元素为pivot
-
-	for i := start; i < end; i++ {
-		if src[i] <= src[pivot] { // 将所有比基准值小的移动到前面，这样大的都在后面
-			index++
-			src[index], src[i] = src[i], src[index]
-		}
-	}
-	src[index+1], src[end] = src[end], src[index+1]
-	return index + 1
 }
 
-func quickSort(data []int, start, end int) {
-	if start >= end {
-		return
-	}
-	// 获取基准位置
-	pivot := getPivot(data, start, end)
-	// 递归对基准位置左右两边的元素排序
-	quickSort(data, start, pivot-1)
-	quickSort(data, pivot+1, end)
-}
-
-// Quick 原地分割版本
-func Quick(data []int) {
-	quickSort(data, 0, len(data)-1)
-}
-
-// QuickSort2 快速排序(直接采用中间元素作为基准值，此方法需要额外的存储空间，相对而言，在空间复杂度上不可取)
-func QuickSort2(data []int) []int {
-	count := len(data)
-	if count <= 0 {
-		return nil
-	}
-
-	// 选择中间的数作为参考
-	keyIndex := count / 2
-	key := data[keyIndex]
-
-	// 分成左右两部分，左边放比key小的值，右边放比key大的值
-	left := make([]int, 0)
-	right := make([]int, 0)
-
-	for i := 0; i < count; i++ {
-		if i == keyIndex {
-			continue
-		}
-		if data[i] < key {
-			left = append(left, data[i])
-		} else {
-			right = append(right, data[i])
+func partition(array []int, p, r int) int {
+	x := array[r]
+	i := p - 1
+	for j := p; j < r; j++ {
+		if array[j] < x {
+			i += 1
+			array[i], array[j] = array[j], array[i]
 		}
 	}
-
-	left = QuickSort2(left)
-	right = QuickSort2(right)
-
-	// 最后将得到的两组数组合起来
-	var result []int
-	result = append(result, left...)
-	result = append(result, key)
-	result = append(result, right...)
-	return result
+	array[i+1], array[r] = array[r], array[i+1]
+	return i + 1
 }
