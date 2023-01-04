@@ -11,7 +11,7 @@ func TestAVL_Insert(t *testing.T) {
 		testData      = []TestInt{1, 2, 3, 4, 5, 6, 7}
 	)
 
-	//4->2->1->3->6->5->7
+	// 4->2->1->3->6->5->7
 	for _, data := range testData {
 		avl.Insert(data)
 	}

@@ -215,21 +215,17 @@ func (node *avlNode) find(element Element) *avlNode {
 }
 
 func (node *avlNode) update(old, element Element) (*avlNode, bool) {
-	oNode := node.find(old)
-	if oNode == nil {
-		return nil, false
-	}
 	eNode := node.find(element)
-	if eNode != nil {
+	switch {
+	case eNode != nil:
 		return node.remove(old)
+	default:
+		newRoot, ok := node.remove(old)
+		if !ok {
+			return nil, false
+		}
+		return newRoot.insert(element), true
 	}
-
-	newRoot, ok := node.remove(old)
-	if !ok {
-		return nil, false
-	}
-	newRoot = newRoot.insert(element)
-	return newRoot, true
 }
 
 // 平衡以root为根节点的子树, 并返回平衡后该子树新的根节点
