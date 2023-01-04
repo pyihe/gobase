@@ -16,6 +16,17 @@ const (
 // Color 节点颜色
 type Color uint8
 
+func (c Color) String() string {
+	switch c {
+	case Red:
+		return "RED"
+	case Black:
+		return "BLACK"
+	default:
+		return "NO"
+	}
+}
+
 // Element 树节点存储的元素
 type Element interface {
 	Value() interface{}  // 元素值
@@ -75,6 +86,12 @@ func getMinNode(node interface{}) (mNode interface{}) {
 			realNode = realNode.children[0]
 		}
 		mNode = realNode
+	case *rbNode:
+		realNode := node.(*rbNode)
+		for realNode.leftChild != nil {
+			realNode = realNode.leftChild
+		}
+		mNode = realNode
 	}
 	return
 }
@@ -98,6 +115,12 @@ func getMaxNode(node interface{}) (mNode interface{}) {
 		realNode := node.(*bNode)
 		for len(realNode.children) > 0 {
 			realNode = realNode.children[len(realNode.children)-1]
+		}
+		mNode = realNode
+	case *rbNode:
+		realNode := node.(*rbNode)
+		for realNode.rightChild != nil {
+			realNode = realNode.rightChild
 		}
 		mNode = realNode
 	}
