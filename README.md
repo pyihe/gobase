@@ -17,9 +17,6 @@ data-structure, algorithm, design-pattern written in Go.
 
 ### [设计模式(design-pattern)](https://github.com/pyihe/gobase/tree/master/design-pattern)
 
-1. [建造者模式(Builder Pattern)](https://github.com/pyihe/gobase/tree/master/design-pattern/builder)
-2. [工厂模式(Factory Pattern)](https://github.com/pyihe/gobase/tree/master/design-pattern/factory)
-3. [抽象工厂模式(Abstract Factory Pattern)](https://github.com/pyihe/gobase/tree/master/design-pattern/factory_abstract)
-4. [原型模式(Prototype Pattern)](https://github.com/pyihe/gobase/tree/master/design-pattern/prototype)
-5. [单例模式(Singleton Pattern)](https://github.com/pyihe/gobase/tree/master/design-pattern/singleton)
-6. [适配器模式(Adapter Pattern)](https://github.com/pyihe/gobase/tree/master/design-pattern/adapter)
+1. [创造型模式(Creation Pattern)](https://github.com/pyihe/gobase/tree/master/design-pattern/creation)
+2. [结构型模式(Structure Pattern)](https://github.com/pyihe/gobase/tree/master/design-pattern/structure)
+3. [行为型模式(Action Pattern)](https://github.com/pyihe/gobase/tree/master/design-pattern/action)
