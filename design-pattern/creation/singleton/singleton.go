@@ -22,18 +22,22 @@ func (h *human) Work() {
 
 var (
 	defaultWorker Worker
-	one           sync.Once
+	once          sync.Once
 )
 
-func NewWorker() Worker {
-	one.Do(func() {
-		defaultWorker = &human{}
-	})
+func GetWorker() Worker {
+	if defaultWorker == nil {
+		once.Do(func() {
+			defaultWorker = &human{}
+		})
+	}
 	return defaultWorker
 }
 
 func main() {
 	// 两次调用返回的都是同一个实例，即单例
-	NewWorker()
-	NewWorker()
+	for i := 0; i < 10; i++ {
+		w := GetWorker()
+		fmt.Printf("%v, %p\n", w == nil, w)
+	}
 }
