@@ -6,3 +6,4 @@
 | 修饰器模式 | [decorator](https://github.com/pyihe/gobase/tree/master/design-pattern/structure/decorator) |
 | 组合模式  | [composite](https://github.com/pyihe/gobase/tree/master/design-pattern/structure/composite) |
 | 外观模式  | [facade](https://github.com/pyihe/gobase/tree/master/design-pattern/structure/facade)       |
+| 代理模式  | [proxy](https://github.com/pyihe/gobase/tree/master/design-pattern/structure/proxy)         |
