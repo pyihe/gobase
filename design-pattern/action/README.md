@@ -11,3 +11,5 @@
 | 迭代器模式  | [iterator](https://github.com/pyihe/gobase/tree/master/design-pattern/action/iterator)                             |
 | 命令模式   | [command](https://github.com/pyihe/gobase/tree/master/design-pattern/action/command)                               |
 | 中介者模式  | [mediator](https://github.com/pyihe/gobase/tree/master/design-pattern/action/mediator)                             |
+| 解释器模式  | [interpreter](https://github.com/pyihe/gobase/tree/master/design-pattern/action/interpreter)                       |
+| 访问者模式  | [visitor](https://github.com/pyihe/gobase/tree/master/design-pattern/action/visitor)                               |
