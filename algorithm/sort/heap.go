@@ -25,10 +25,11 @@ func Heap(data []int) {
 }
 
 func buildHeap(src []int) {
-	// 表示n叉堆的数组中，叶子节点位于len(src)/4往后的元素中
+	// 表示n叉堆的数组中，叶子节点位于len(src)/n往后的元素中
 	// 从第一个非叶子节点开始，比较节点和自己孩子的大小
 	// 最大堆选出最大的值作为父节点，最小堆选择最小的值作为父节点
 	n := len(src)
+	// 二叉堆
 	for i := n/2 - 1; i >= 0; i-- {
 		heapify(src, i)
 	}

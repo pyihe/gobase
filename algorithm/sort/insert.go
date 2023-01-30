@@ -17,7 +17,7 @@ package sort
 
 func Insert(data []int) {
 	count := len(data)
-	if count <= 0 {
+	if count <= 1 {
 		return
 	}
 
