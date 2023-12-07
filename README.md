@@ -10,7 +10,7 @@ data-structure, algorithm, design-pattern written in Go.
 4. [树(Tree)](https://github.com/pyihe/gobase/tree/master/data-structure/tree)
 5. [图(Graph)](https://github.com/pyihe/gobase/tree/master/data-structure/graph)
 6. [跳表(SkipList)](https://github.com/pyihe/gobase/tree/master/data-structure/skiplist)
-7. [堆](https://github.com/pyihe/gobase/tree/master/data-structure/heap)
+7. [堆(Heap)](https://github.com/pyihe/gobase/tree/master/data-structure/heap)
 
 ### [算法(algorithm)](https://github.com/pyihe/gobase/tree/master/algorithm)
 
